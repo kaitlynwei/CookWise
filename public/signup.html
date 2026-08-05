@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Create a CookWise account.">
+    <title>Sign Up | CookWise</title>
+  </head>
+  <body>
+    <header>
+      <p><a href="index.html">CookWise</a></p>
+      <nav aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="recipes.html">Find Recipes</a>
+        <a href="nutrition.html">Macro Guide</a>
+        <a href="about.html">About</a>
+        <a href="signin.html">Sign In</a>
+      </nav>
+    </header>
+
+    <main>
+      <h1>Create an Account</h1>
+      <p>
+        Create a private local CookWise account. After signing up, you can add
+        your profile information.
+      </p>
+
+      <form id="signup-form" data-mode="signup">
+        <p>
+          <label for="username">Username:</label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            minlength="3"
+            maxlength="30"
+            pattern="[A-Za-z0-9_-]+"
+            autocomplete="username"
+            required
+          >
+        </p>
+        <p>
+          <label for="password">Password:</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            minlength="8"
+            maxlength="128"
+            autocomplete="new-password"
+            required
+          >
+        </p>
+        <button type="submit">Sign Up</button>
+        <p id="auth-message" role="status" aria-live="polite"></p>
+      </form>
+
+      <p>Already have an account? <a href="signin.html">Sign in</a>.</p>
+    </main>
+
+    <footer>
+      <p>&copy; 2026 CookWise</p>
+    </footer>
+
+    <script src="js/auth.js"></script>
+  </body>
+</html>
