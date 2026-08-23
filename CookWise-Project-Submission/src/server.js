@@ -35,7 +35,6 @@ const {
   poundsToKilograms
 } = require("./units");
 const {
-  dailyMotivation,
   dailyRecipeIndex,
   recommendationReason,
   rotateRecipes
@@ -45,7 +44,6 @@ const HOST = "127.0.0.1";
 const PORT = Number(process.env.PORT || 3000);
 const ROOT = path.resolve(__dirname, "..");
 const PUBLIC_DIRECTORY = path.join(ROOT, "public");
-const VIEWS_DIRECTORY = path.join(__dirname, "views");
 const DATA_DIRECTORY = path.join(ROOT, "data");
 const DATABASE_PATH = path.join(DATA_DIRECTORY, "cookwise.db");
 const SESSION_LENGTH_SECONDS = 60 * 60 * 24 * 7;
@@ -153,12 +151,20 @@ const contentTypes = {
 };
 
 const publicFiles = new Set([
+  "about.html",
   "css/styles.css",
+  "index.html",
   "js/auth.js",
   "js/home.js",
   "js/profile.js",
   "js/recipe.js",
-  "js/recipes.js"
+  "js/recipes.js",
+  "nutrition.html",
+  "profile.html",
+  "recipe.html",
+  "recipes.html",
+  "signin.html",
+  "signup.html"
 ]);
 
 const attempts = new Map();
@@ -172,16 +178,8 @@ function sendJson(response, status, data, headers = {}) {
   response.end(JSON.stringify(data));
 }
 
-function sendRedirect(response, location) {
-  response.writeHead(308, {
-    Location: location,
-    "Cache-Control": "no-store"
-  });
-  response.end();
-}
-
-function sendFileFrom(response, directory, filename) {
-  const filePath = path.join(directory, filename);
+function sendFile(response, filename) {
+  const filePath = path.join(PUBLIC_DIRECTORY, filename);
 
   fs.readFile(filePath, (error, contents) => {
     if (error) {
@@ -200,14 +198,6 @@ function sendFileFrom(response, directory, filename) {
     });
     response.end(contents);
   });
-}
-
-function sendPublicFile(response, filename) {
-  sendFileFrom(response, PUBLIC_DIRECTORY, filename);
-}
-
-function sendPage(response, filename) {
-  sendFileFrom(response, VIEWS_DIRECTORY, filename);
 }
 
 function readJson(request) {
@@ -458,13 +448,7 @@ function listRecipes(url, user = null) {
   const dishType = (url.searchParams.get("dishType") || "").trim();
   const maxTime = Number(url.searchParams.get("maxTime") || 0);
   const requestedLimit = Number(url.searchParams.get("limit") || 24);
-  const limit = Number.isFinite(requestedLimit)
-    ? Math.min(Math.max(Math.trunc(requestedLimit), 1), 100)
-    : 24;
-  const requestedOffset = Number(url.searchParams.get("offset") || 0);
-  const offset = Number.isFinite(requestedOffset)
-    ? Math.min(Math.max(Math.trunc(requestedOffset), 0), 10000)
-    : 0;
+  const limit = Math.min(Math.max(requestedLimit, 1), 100);
   const sort = url.searchParams.get("sort") || "smart";
   const clauses = [];
   const parameters = [];
@@ -506,37 +490,31 @@ function listRecipes(url, user = null) {
   }[sort] || "smart_score DESC, provider_score DESC";
 
   const where = clauses.length ? " WHERE " + clauses.join(" AND ") : "";
+  const databaseLimit =
+    sort === "rotate" || sort === "personalized" ? 500 : limit;
   let rows = database
     .prepare(
       "SELECT * FROM recipes" +
         where +
         " ORDER BY " +
-        orderBy
+        orderBy +
+        " LIMIT ?"
     )
-    .all(...parameters);
+    .all(...parameters, databaseLimit);
 
   if (sort === "rotate") {
-    rows = rotateRecipes(rows);
+    rows = rotateRecipes(rows).slice(0, limit);
   }
   let recipes = rows.map((row) => publicRecipe(row));
   if (user) recipes = filterForUser(recipes, user);
   if (sort === "personalized") {
-    recipes = personalizeRecipes(recipes, user);
+    recipes = personalizeRecipes(recipes, user).slice(0, limit);
     recipes.forEach((recipe) => {
       recipe.preferenceScore = preferenceScore(recipe, user);
     });
   }
 
-  const total = recipes.length;
-  const page = recipes.slice(offset, offset + limit);
-
-  return {
-    recipes: page,
-    total,
-    limit,
-    offset,
-    hasMore: offset + page.length < total
-  };
+  return recipes;
 }
 
 function dailyRecipe(user = null) {
@@ -556,7 +534,6 @@ function dailyRecipe(user = null) {
   const recipe = recipes[index];
   return {
     recipe,
-    motivation: dailyMotivation(),
     reason:
       (hasPreferences(user) ? "This meal matches your saved preferences. " : "") +
       recommendationReason(recipe),
@@ -982,9 +959,8 @@ async function routeApi(request, response, pathname) {
 
     if (request.method === "GET" && pathname === "/api/recipes") {
       const url = new URL(request.url, "http://" + request.headers.host);
-      const result = listRecipes(url, user);
       sendJson(response, 200, {
-        ...result,
+        recipes: listRecipes(url, user),
         facets: recipeFacets(),
         configured: Boolean(process.env.SPOONACULAR_API_KEY)
       });
@@ -1089,59 +1065,17 @@ const server = http.createServer((request, response) => {
     return;
   }
 
-  const cleanPageRoutes = new Map([
-    ["/", "index.html"],
-    ["/about", "about.html"],
-    ["/nutrition", "nutrition.html"],
-    ["/profile", "profile.html"],
-    ["/recipes", "recipes.html"],
-    ["/signin", "signin.html"],
-    ["/signup", "signup.html"]
-  ]);
-  const legacyPageRoutes = new Map([
-    ["/index.html", "/"],
-    ["/about.html", "/about"],
-    ["/nutrition.html", "/nutrition"],
-    ["/profile.html", "/profile"],
-    ["/recipes.html", "/recipes"],
-    ["/signin.html", "/signin"],
-    ["/signup.html", "/signup"]
-  ]);
-
-  if (legacyPageRoutes.has(url.pathname)) {
-    sendRedirect(response, legacyPageRoutes.get(url.pathname));
-    return;
-  }
-
-  if (url.pathname === "/recipe.html") {
-    const legacyRecipeId = url.searchParams.get("id");
-    sendRedirect(
-      response,
-      /^\d+$/.test(legacyRecipeId || "")
-        ? "/recipes/" + legacyRecipeId
-        : "/recipes"
-    );
-    return;
-  }
-
-  if (/^\/recipes\/\d+$/.test(url.pathname)) {
-    sendPage(response, "recipe.html");
-    return;
-  }
-
-  if (cleanPageRoutes.has(url.pathname)) {
-    sendPage(response, cleanPageRoutes.get(url.pathname));
-    return;
-  }
-
-  const filename = decodeURIComponent(url.pathname.slice(1));
+  const filename =
+    url.pathname === "/"
+      ? "index.html"
+      : decodeURIComponent(url.pathname.slice(1));
 
   if (!publicFiles.has(filename)) {
     sendJson(response, 404, { error: "Page not found." });
     return;
   }
 
-  sendPublicFile(response, filename);
+  sendFile(response, filename);
 });
 
 server.listen(PORT, HOST, () => {

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+      name="description"
+      content="Manage your CookWise profile and view personal macro context."
+    >
+    <title>My Profile | CookWise</title>
+    <link rel="stylesheet" href="css/styles.css">
+  </head>
+  <body>
+    <header>
+      <p><a href="index.html">CookWise</a></p>
+      <nav aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="recipes.html">Find Recipes</a>
+        <a href="nutrition.html">Macro Guide</a>
+        <a href="about.html">About</a>
+        <a href="profile.html" aria-current="page">My Profile</a>
+      </nav>
+    </header>
+
+    <main>
+      <h1>My Profile</h1>
+      <p>Signed in as <strong id="profile-username"></strong>.</p>
+
+      <form id="profile-form">
+        <p>
+          <label for="name">Name:</label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            maxlength="100"
+            autocomplete="name"
+            required
+          >
+        </p>
+        <fieldset>
+          <legend>Height</legend>
+          <p>
+            <label for="height-feet">Feet:</label>
+            <input
+              id="height-feet"
+              name="heightFeet"
+              type="number"
+              min="2"
+              max="8"
+              step="1"
+              required
+            >
+          </p>
+          <p>
+            <label for="height-inches">Inches:</label>
+            <input
+              id="height-inches"
+              name="heightInches"
+              type="number"
+              min="0"
+              max="11"
+              step="1"
+              required
+            >
+          </p>
+        </fieldset>
+        <p>
+          <label for="weight-pounds">Weight in pounds:</label>
+          <input
+            id="weight-pounds"
+            name="weightPounds"
+            type="number"
+            min="44"
+            max="882"
+            step="0.1"
+            required
+          >
+        </p>
+        <p>
+          <label for="gender">Gender:</label>
+          <select id="gender" name="gender" required>
+            <option value="">Choose an option</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+            <option value="nonbinary">Nonbinary</option>
+            <option value="prefer-not">Prefer not to say</option>
+          </select>
+        </p>
+
+        <fieldset>
+          <legend>Cooking Preferences</legend>
+          <p>
+            These choices sort closer recipe matches toward the top. They are
+            preferences, not medical nutrition targets.
+          </p>
+          <p>
+            <label for="preferred-servings">Preferred servings:</label>
+            <select id="preferred-servings" name="preferredServings" required>
+              <option value="1">1 person</option>
+              <option value="2">2 people</option>
+              <option value="3">3 people</option>
+              <option value="4">4 people</option>
+              <option value="5">5 people</option>
+              <option value="6">6 people</option>
+              <option value="7">7 people</option>
+              <option value="8">8 people</option>
+            </select>
+          </p>
+          <p>
+            <label for="preferred-cuisine">Preferred cuisine:</label>
+            <select id="preferred-cuisine" name="preferredCuisine">
+              <option value="">Any cuisine</option>
+            </select>
+          </p>
+          <p>
+            <label for="preferred-cook-time">Maximum cook time:</label>
+            <select id="preferred-cook-time" name="preferredCookTime" required>
+              <option value="20">20 minutes</option>
+              <option value="30">30 minutes</option>
+              <option value="45">45 minutes</option>
+              <option value="60">60 minutes</option>
+              <option value="90">90 minutes</option>
+            </select>
+          </p>
+          <p>
+            <label for="preferred-protein">Minimum protein per serving:</label>
+            <select id="preferred-protein" name="preferredProtein" required>
+              <option value="0">No minimum</option>
+              <option value="10">10 grams</option>
+              <option value="15">15 grams</option>
+              <option value="20">20 grams</option>
+              <option value="25">25 grams</option>
+              <option value="30">30 grams</option>
+              <option value="40">40 grams</option>
+            </select>
+          </p>
+        </fieldset>
+        <fieldset>
+          <legend>Dietary and Allergen Preferences</legend>
+          <p>
+            CookWise hides recipes containing allergens detected in their
+            ingredient lists. Automated screening may miss cross contact or
+            allergens hidden in packaged ingredients, so always verify labels
+            and the original recipe source.
+          </p>
+          <p>
+            <label for="preferred-diet">Dietary preference:</label>
+            <select id="preferred-diet" name="preferredDiet">
+              <option value="">No dietary filter</option>
+              <option value="vegetarian">Vegetarian</option>
+              <option value="vegan">Vegan</option>
+              <option value="gluten-free">Gluten-free</option>
+              <option value="dairy-free">Dairy-free</option>
+            </select>
+          </p>
+          <p>Hide recipes when these allergens are detected:</p>
+          <label><input type="checkbox" name="avoidedAllergens" value="milk"> Milk</label>
+          <label><input type="checkbox" name="avoidedAllergens" value="egg"> Egg</label>
+          <label><input type="checkbox" name="avoidedAllergens" value="fish"> Fish</label>
+          <label><input type="checkbox" name="avoidedAllergens" value="shellfish"> Crustacean shellfish</label>
+          <label><input type="checkbox" name="avoidedAllergens" value="tree-nuts"> Tree nuts</label>
+          <label><input type="checkbox" name="avoidedAllergens" value="peanuts"> Peanuts</label>
+          <label><input type="checkbox" name="avoidedAllergens" value="wheat"> Wheat</label>
+          <label><input type="checkbox" name="avoidedAllergens" value="soy"> Soybeans</label>
+          <label><input type="checkbox" name="avoidedAllergens" value="sesame"> Sesame</label>
+          <p>
+            Allergen list based on the
+            <a href="https://www.fda.gov/industry/fda-basics-industry/what-major-food-allergen">FDA's nine major food allergens</a>.
+          </p>
+        </fieldset>
+        <button type="submit">Save Profile</button>
+        <p id="profile-message" role="status" aria-live="polite"></p>
+      </form>
+
+      <section aria-labelledby="personal-heading">
+        <h2 id="personal-heading">Personal Macro Context</h2>
+        <div id="personal-context">
+          <p>Save your profile to see your personal context.</p>
+        </div>
+
+        <h3>Daily Food Pattern Reference</h3>
+        <p>
+          The current U.S. Dietary Guidelines provide the following example for
+          a 2,000-calorie eating pattern. This is a general reference because
+          personal calorie needs depend on age, sex, height, weight, and
+          physical activity.
+        </p>
+        <ul>
+          <li>Protein foods: 3 to 4 servings</li>
+          <li>Dairy or fortified alternatives: 3 servings</li>
+          <li>Vegetables: 3 servings</li>
+          <li>Fruits: 2 servings</li>
+          <li>Whole grains: 2 to 4 servings</li>
+          <li>Healthy fats: about 4 1/2 teaspoons</li>
+        </ul>
+        <p>
+          A protein-food serving can be 3 ounces of cooked meat, poultry, or
+          seafood; 1 egg; 1/2 cup beans, peas, or lentils; 1 ounce nuts or
+          seeds; 2 tablespoons nut or seed butter; or 3 ounces soy food.
+        </p>
+        <p>
+          Sources:
+          <a href="https://www.realfood.gov/">Dietary Guidelines for Americans, 2025 to 2030</a>
+          and
+          <a href="https://cdn.realfood.gov/Daily%20Serving%20Sizes_508.pdf">official Daily Servings Guide</a>.
+        </p>
+      </section>
+
+      <section aria-labelledby="achievements-heading">
+        <h2 id="achievements-heading">Cooking Achievements</h2>
+        <p id="cooking-total">Loading cooking progress.</p>
+        <div id="achievement-list"></div>
+        <h3>Recently Cooked</h3>
+        <ul id="recent-cooking"></ul>
+      </section>
+
+      <button id="signout-button" type="button">Sign Out</button>
+
+      <section aria-labelledby="delete-account-heading">
+        <h2 id="delete-account-heading">Delete Account</h2>
+        <p>
+          Permanently delete your profile, preferences, cooking history,
+          achievements, and sign-in sessions. This cannot be undone.
+        </p>
+        <p>
+          <label for="delete-password">Current password:</label>
+          <input
+            id="delete-password"
+            type="password"
+            minlength="8"
+            maxlength="128"
+            autocomplete="current-password"
+          >
+          <button
+            id="delete-password-toggle"
+            type="button"
+            aria-pressed="false"
+          >Show password</button>
+        </p>
+        <button id="delete-account-button" type="button">
+          Permanently Delete Account
+        </button>
+        <p id="delete-account-message" role="status" aria-live="polite"></p>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2026 CookWise</p>
+    </footer>
+
+    <script src="js/profile.js"></script>
+  </body>
+</html>

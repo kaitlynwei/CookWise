@@ -45,7 +45,7 @@ form.addEventListener("submit", async (event) => {
       return;
     }
 
-    window.location.href = "/profile";
+    window.location.href = "profile.html";
   } catch {
     message.textContent =
       "CookWise could not reach the account server. Please try again.";

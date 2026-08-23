@@ -5,16 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Create a CookWise account.">
     <title>Sign Up | CookWise</title>
+    <!-- Served only through CookWise page routes. -->
+    <link rel="stylesheet" href="/css/styles.css">
   </head>
   <body>
     <header>
-      <p><a href="index.html">CookWise</a></p>
+      <p><a href="/">CookWise</a></p>
       <nav aria-label="Main navigation">
-        <a href="index.html">Home</a>
-        <a href="recipes.html">Find Recipes</a>
-        <a href="nutrition.html">Macro Guide</a>
-        <a href="about.html">About</a>
-        <a href="signin.html">Sign In</a>
+        <a href="/">Home</a>
+        <a href="/recipes">Find Recipes</a>
+        <a href="/nutrition">Macro Guide</a>
+        <a href="/about">About</a>
+        <a href="/signin">Sign In</a>
       </nav>
     </header>
 
@@ -50,18 +52,42 @@
             autocomplete="new-password"
             required
           >
+          <button
+            class="password-toggle"
+            type="button"
+            data-password-target="password"
+            aria-pressed="false"
+          >Show password</button>
+        </p>
+        <p>
+          <label for="confirm-password">Confirm password:</label>
+          <input
+            id="confirm-password"
+            name="confirmPassword"
+            type="password"
+            minlength="8"
+            maxlength="128"
+            autocomplete="new-password"
+            required
+          >
+          <button
+            class="password-toggle"
+            type="button"
+            data-password-target="confirm-password"
+            aria-pressed="false"
+          >Show password</button>
         </p>
         <button type="submit">Sign Up</button>
         <p id="auth-message" role="status" aria-live="polite"></p>
       </form>
 
-      <p>Already have an account? <a href="signin.html">Sign in</a>.</p>
+      <p>Already have an account? <a href="/signin">Sign in</a>.</p>
     </main>
 
     <footer>
       <p>&copy; 2026 CookWise</p>
     </footer>
 
-    <script src="js/auth.js"></script>
+    <script src="/js/auth.js"></script>
   </body>
 </html>

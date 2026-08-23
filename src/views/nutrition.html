@@ -8,16 +8,18 @@
       content="Learn how calories, protein, carbohydrates, and fat fit into smart eating."
     >
     <title>Macro Guide | CookWise</title>
+    <!-- Served only through CookWise page routes. -->
+    <link rel="stylesheet" href="/css/styles.css">
   </head>
   <body>
     <header>
-      <p><a href="index.html">CookWise</a></p>
+      <p><a href="/">CookWise</a></p>
       <nav aria-label="Main navigation">
-        <a href="index.html">Home</a>
-        <a href="recipes.html">Find Recipes</a>
-        <a href="nutrition.html" aria-current="page">Macro Guide</a>
-        <a href="about.html">About</a>
-        <a href="profile.html">Profile</a>
+        <a href="/">Home</a>
+        <a href="/recipes">Find Recipes</a>
+        <a href="/nutrition" aria-current="page">Macro Guide</a>
+        <a href="/about">About</a>
+        <a href="/profile">Profile</a>
       </nav>
     </header>
 
@@ -29,14 +31,12 @@
         nutrient; they measure how much energy food provides.
       </p>
 
-      <nav aria-label="Macro guide sections">
-        <a href="#calories">Calories</a>
-        <a href="#protein">Protein</a>
-        <a href="#carbohydrates">Carbohydrates</a>
-        <a href="#fat">Fat</a>
-        <a href="#timing">Meal Timing</a>
-        <a href="#daily-values">Daily Values</a>
-      </nav>
+      <ul class="macro-overview" aria-label="Macronutrient overview">
+        <li><strong>Calories</strong><span>Measure the energy food provides</span></li>
+        <li><strong>Protein</strong><span>Supports muscle, growth, and repair</span></li>
+        <li><strong>Carbohydrates</strong><span>Provide accessible energy</span></li>
+        <li><strong>Fat</strong><span>Supports energy and vitamin absorption</span></li>
+      </ul>
 
       <section id="calories">
         <h2>Calories: Your Total Energy</h2>
@@ -63,9 +63,16 @@
           source can also help make a meal satisfying.
         </p>
         <p>
-          The FDA Daily Value is 50 grams for a 2,000-calorie diet, but this is
-          not a maximum. Needs vary with body size, age, pregnancy, health, and
-          activity. Include protein across meals when practical.
+          The 2025 to 2030 Dietary Guidelines for Americans gives a general target
+          of 1.2 to 1.6 grams of protein per kilogram of body weight per day. For
+          example, a person weighing 125 pounds is about 57 kilograms, producing
+          a general range of roughly 68 to 91 grams per day. This explains why an
+          older 45 gram RDA estimate may be lower than current guidance.
+        </p>
+        <p>
+          The FDA Daily Value remains 50 grams for label comparison; it is not a
+          maximum or a personalized goal. Needs can differ with age, activity,
+          pregnancy, health conditions, and training goals.
         </p>
       </section>
 
@@ -73,13 +80,13 @@
         <h2>Carbohydrates: Accessible Energy</h2>
         <p>
           Your body breaks carbohydrates down into glucose, a main energy source
-          for cells, tissues, and organs. Higher-fiber sources such as beans,
+          for cells, tissues, and organs. Foods with more fiber, such as beans,
           whole grains, fruit, and vegetables also support fullness and
           digestive health.
         </p>
         <p>
           The FDA Daily Value is 275 grams for a 2,000-calorie diet. It is a
-          comparison point, not a strict ceiling. Carbohydrate-rich meals can be
+          comparison point, not a strict ceiling. Meals with more carbohydrates can be
           useful around activity, but can be eaten at any meal.
         </p>
       </section>
@@ -124,9 +131,57 @@
         </p>
       </section>
 
+      <section id="daily-pattern">
+        <h2>General Daily Food Pattern</h2>
+        <p>
+          For a general 2,000 calorie pattern, the official 2025 to 2030 Daily
+          Servings Guide lists 3 to 4 servings of protein foods, 3 dairy servings,
+          3 vegetable servings, 2 fruit servings, 2 to 4 whole grain servings, and
+          about 4 1/2 teaspoons of healthy fats. People with higher or lower
+          calorie needs require different amounts.
+        </p>
+        <p>
+          For healthy adults, National Academies reference ranges place
+          carbohydrates at 45% to 65% of total calories and fat at 20% to 35%.
+          Protein also has a broad 10% to 35% calorie range, but the current
+          target based on body weight above is more useful for CookWise's profile
+          comparison. These percentages are ranges, not requirements to hit an
+          exact number every day.
+        </p>
+        <p>
+          On a 2,000 calorie reference diet, those percentage ranges equal about
+          225 to 325 grams of carbohydrates and 44 to 78 grams of fat. The broad
+          protein percentage range would equal 50 to 175 grams, which is why
+          CookWise uses the narrower current calculation based on body weight for its
+          profile display instead of presenting 50 grams as everyone's goal.
+        </p>
+        <p>
+          FDA 2,000 calorie label references also identify at least 28 grams of
+          fiber, less than 2,300 milligrams of sodium, less than 20 grams of
+          saturated fat, and less than 50 grams of added sugars. Current dietary
+          guidance encourages minimizing added sugars and highly processed
+          foods.
+        </p>
+      </section>
+
       <section>
         <h2>Nutrition Sources</h2>
         <ul>
+          <li>
+            <a href="https://www.realfood.gov/">
+              Dietary Guidelines for Americans, 2025 to 2030
+            </a>
+          </li>
+          <li>
+            <a href="https://cdn.realfood.gov/Daily%20Serving%20Sizes_508.pdf">
+              USDA and HHS: Daily Servings Guide
+            </a>
+          </li>
+          <li>
+            <a href="https://www.nal.usda.gov/human-nutrition-and-food-safety/dri-calculator">
+              USDA: DRI Calculator for Healthcare Professionals
+            </a>
+          </li>
           <li>
             <a
               href="https://www.fda.gov/food/nutrition-facts-label/daily-value-nutrition-and-supplement-facts-labels"
@@ -135,20 +190,10 @@
             </a>
           </li>
           <li>
-            <a href="https://medlineplus.gov/carbohydrates.html">
-              MedlinePlus: Carbohydrates
-            </a>
-          </li>
-          <li>
-            <a href="https://medlineplus.gov/dietaryfats.html">
-              MedlinePlus: Dietary Fats
-            </a>
-          </li>
-          <li>
             <a
-              href="https://www.nia.nih.gov/health/healthy-eating-nutrition-and-diet/healthy-eating-you-age-know-your-food-groups"
+              href="https://nap.nationalacademies.org/collection/57/dietary-reference-intakes"
             >
-              National Institute on Aging: Protein Foods
+              National Academies: Dietary Reference Intakes
             </a>
           </li>
         </ul>

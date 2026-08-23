@@ -8,6 +8,7 @@
       content="Search CookWise recipes by name, cuisine, difficulty, and cook time."
     >
     <title>Find Recipes | CookWise</title>
+    <link rel="stylesheet" href="css/styles.css">
   </head>
   <body>
     <header>
@@ -24,8 +25,8 @@
     <main>
       <h1>Find Recipes</h1>
       <p>
-        Search the current recipe collection or narrow it by cuisine,
-        difficulty, and cook time.
+        Choose one approachable dish and get cooking. Search the collection or
+        narrow it by cuisine, difficulty, and cook time.
       </p>
 
       <form id="recipe-filters">
@@ -80,6 +81,8 @@
         <p>
           <label for="sort-recipes">Sort:</label>
           <select id="sort-recipes" name="sort">
+            <option value="personalized">Best match for my preferences</option>
+            <option value="rotate">Fresh weekly rotation</option>
             <option value="smart">CookWise smart ranking</option>
             <option value="popularity">Provider rating and popularity</option>
             <option value="health">Health score</option>

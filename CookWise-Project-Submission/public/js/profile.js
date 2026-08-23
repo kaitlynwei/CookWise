@@ -105,7 +105,7 @@ async function loadCookingStats() {
   stats.recent.forEach((entry) => {
     const item = document.createElement("li");
     const link = document.createElement("a");
-    link.href = "/recipes/" + entry.recipeId;
+    link.href = "recipe.html?id=" + entry.recipeId;
     link.textContent = entry.name;
     item.append(link);
     recent.append(item);
@@ -117,7 +117,7 @@ async function loadProfile() {
   const response = await fetch("/api/me");
 
   if (response.status === 401) {
-    window.location.href = "/signin";
+    window.location.href = "signin.html";
     return;
   }
 
@@ -177,7 +177,7 @@ document
   .querySelector("#signout-button")
   .addEventListener("click", async () => {
     await fetch("/api/logout", { method: "POST" });
-    window.location.href = "/signin";
+    window.location.href = "signin.html";
   });
 
 document
@@ -218,7 +218,7 @@ document
         deleteMessage.textContent = result.error || "The account could not be deleted.";
         return;
       }
-      window.location.href = "/signup";
+      window.location.href = "signup.html";
     } catch {
       deleteMessage.textContent = "CookWise could not reach the account server.";
     }

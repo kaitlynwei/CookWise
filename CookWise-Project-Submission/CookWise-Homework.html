@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="CookWise is a beginner-friendly recipe discovery, nutrition education, and cooking motivation project."
+    >
+    <title>CookWise Project Submission</title>
+  </head>
+  <body>
+    <header>
+      <h1>CookWise</h1>
+      <p>Cook confidently, eat thoughtfully.</p>
+      <nav aria-label="Main navigation">
+        <a href="#home">Home</a>
+        <a href="#recipes">Find Recipes</a>
+        <a href="#nutrition">Macro Guide</a>
+        <a href="#profile">Profile</a>
+        <a href="#about">About</a>
+      </nav>
+    </header>
+
+    <main>
+      <section id="home">
+        <h2>Beginner-friendly recipes for smarter eating</h2>
+        <p>
+          CookWise helps people discover approachable meals from a variety of
+          cuisines. Recipes include ingredients, instructions, difficulty,
+          approximate cooking time, adjustable servings, and estimated macros.
+        </p>
+        <h3>Today's Cooking Nudge</h3>
+        <p>
+          Mediterranean Chickpea Bowl — an approachable meal selected today to
+          help you stop scrolling and start cooking. CookWise recommends a
+          different meal each day and reshuffles recipe browsing regularly
+          without deleting recipes.
+        </p>
+        <p>
+          Meals are reviewed for clear preparation information and practical
+          nutrition. Recipes that need extra consideration include educational
+          guidance instead of being automatically excluded.
+        </p>
+        <p>
+          The full application currently stores 53 approved recipes. Completed
+          dish and instruction images appear when provided by the credited
+          recipe source.
+        </p>
+      </section>
+
+      <section id="recipes">
+        <h2>Find Recipes</h2>
+        <form>
+          <p>
+            <label for="recipe-search">Search by recipe or ingredient</label>
+            <input id="recipe-search" name="recipe-search" type="search">
+          </p>
+          <p>
+            <label for="difficulty">Difficulty</label>
+            <select id="difficulty" name="difficulty">
+              <option value="">Any difficulty</option>
+              <option>Easy</option>
+              <option>Medium</option>
+              <option>Hard</option>
+            </select>
+          </p>
+          <p>
+            <label for="meal-type">Meal type</label>
+            <select id="meal-type" name="meal-type">
+              <option value="">Any meal type</option>
+              <option>Savory</option>
+              <option>Sweet</option>
+              <option>Breakfast</option>
+            </select>
+          </p>
+          <button type="submit">Search</button>
+        </form>
+
+        <h3>Example Recipe: Mediterranean Chickpea Bowl</h3>
+        <p>Difficulty: Easy</p>
+        <p>Approximate cooking time: 25 minutes</p>
+        <p>Recommended serving size: 1 bowl per person</p>
+
+        <label for="servings">Number of people</label>
+        <select id="servings" name="servings">
+          <option>1</option>
+          <option selected>2</option>
+          <option>3</option>
+          <option>4</option>
+          <option>5</option>
+          <option>6</option>
+        </select>
+
+        <h4>Ingredients for <span id="ingredient-serving-count">2</span> people</h4>
+        <ul id="example-ingredients">
+          <li><span data-base-amount="1">1</span> can chickpeas, rinsed</li>
+          <li><span data-base-amount="1">1</span> cup cooked brown rice or quinoa</li>
+          <li><span data-base-amount="1">1</span> cup chopped cucumber and tomato</li>
+          <li><span data-base-amount="2">2</span> tablespoons hummus</li>
+          <li><span data-base-amount="1">1</span> tablespoon olive oil</li>
+          <li><span data-base-amount="0.5">1/2</span> lemon</li>
+        </ul>
+
+        <h4>Substitutions</h4>
+        <ul>
+          <li>Use white beans or lentils instead of chickpeas.</li>
+          <li>Use any cooked whole grain instead of brown rice.</li>
+          <li>Use plain yogurt or tahini instead of hummus.</li>
+        </ul>
+
+        <h4>Instructions</h4>
+        <ol>
+          <li>Prepare 1 cup of brown rice or quinoa according to its package instructions.</li>
+          <li>Rinse 1 can of chickpeas and divide it between two bowls.</li>
+          <li>Add 1 cup of cooked grain and 1 cup of chopped cucumber and tomato.</li>
+          <li>Top each bowl with 1 tablespoon of hummus.</li>
+          <li>Drizzle the bowls with 1 tablespoon of olive oil and the juice of 1/2 lemon, then serve.</li>
+        </ol>
+
+        <h4>Estimated macros per serving</h4>
+        <ul id="example-macros">
+          <li>Calories: 430 per serving; <span data-base-total="860">860</span> total</li>
+          <li>Protein: 16 grams per serving; <span data-base-total="32">32</span> grams total</li>
+          <li>Carbohydrates: 58 grams per serving; <span data-base-total="116">116</span> grams total</li>
+          <li>Fat: 16 grams per serving; <span data-base-total="32">32</span> grams total</li>
+          <li>Fiber: 11 grams per serving; <span data-base-total="22">22</span> grams total</li>
+          <li>Sugar: 7 grams per serving; <span data-base-total="14">14</span> grams total</li>
+          <li>Sodium: 480 milligrams per serving; <span data-base-total="960">960</span> milligrams total</li>
+        </ul>
+        <p id="serving-update-status" aria-live="polite">
+          Ingredients and recipe totals are shown for 2 people.
+        </p>
+      </section>
+
+      <section id="nutrition">
+        <h2>Macro Guide</h2>
+
+        <h3>Protein</h3>
+        <p>
+          Protein helps build and repair body tissue and can make meals more
+          satisfying. Including a protein source throughout the day may be more
+          practical than trying to consume most of it in one meal.
+        </p>
+        <p>
+          Current U.S. guidance gives a general target of 1.2–1.6 grams per
+          kilogram of body weight per day. A 125-pound person is about 57
+          kilograms, which is approximately 68–91 grams of protein per day.
+          These amounts are approximations.
+        </p>
+
+        <h3>Carbohydrates</h3>
+        <p>
+          Carbohydrates are an important source of energy. Whole grains,
+          legumes, fruits, and vegetables also provide fiber and other useful
+          nutrients.
+        </p>
+
+        <h3>Fat</h3>
+        <p>
+          Dietary fat supports cells, hormones, and the absorption of certain
+          vitamins. Unsaturated fats from foods such as nuts, seeds, fish, and
+          olive oil can be useful parts of balanced meals.
+        </p>
+
+        <h3>Meal timing and portions</h3>
+        <p>
+          There is no single meal schedule that works for everyone. Hunger,
+          activity, health needs, and personal routines affect useful meal
+          timing and portions. Macro estimates are approximations.
+        </p>
+
+        <h3>General 2,000-Calorie Daily Pattern</h3>
+        <ul>
+          <li>Protein foods: 3–4 servings</li>
+          <li>Dairy or fortified alternatives: 3 servings</li>
+          <li>Vegetables: 3 servings</li>
+          <li>Fruits: 2 servings</li>
+          <li>Whole grains: 2–4 servings</li>
+          <li>Healthy fats: about 4 1/2 teaspoons</li>
+          <li>Fiber: at least 28 grams</li>
+          <li>Sodium: less than 2,300 milligrams</li>
+        </ul>
+        <p>
+          These amounts are approximations.
+        </p>
+      </section>
+
+      <section id="profile">
+        <h2>Personal Profile</h2>
+        <p>
+          CookWise can use a small profile to place recipe macros in a more
+          personal context.
+        </p>
+        <h3>Account Access</h3>
+        <p>
+          The full application supports account creation, password
+          confirmation, sign in, visible or hidden passwords, and account
+          deletion. Account data is stored in SQLite, and passwords are stored
+          as salted hashes rather than plain text.
+        </p>
+        <form>
+          <p><label for="name">Name</label> <input id="name" name="name"></p>
+          <fieldset>
+            <legend>Height</legend>
+            <label for="height-feet">Feet</label>
+            <input id="height-feet" name="height-feet" type="number">
+            <label for="height-inches">Inches</label>
+            <input id="height-inches" name="height-inches" type="number">
+          </fieldset>
+          <p>
+            <label for="weight-pounds">Weight in pounds</label>
+            <input id="weight-pounds" name="weight-pounds" type="number">
+          </p>
+          <p>
+            <label for="gender">Gender</label>
+            <select id="gender" name="gender">
+              <option value="">Select</option>
+              <option>Female</option>
+              <option>Male</option>
+              <option>Nonbinary</option>
+              <option>Prefer not to say</option>
+            </select>
+          </p>
+          <fieldset>
+            <legend>Cooking Preferences</legend>
+            <p>
+              <label for="homework-servings">Preferred servings</label>
+              <select id="homework-servings"><option>1</option><option selected>2</option><option>3</option><option>4</option></select>
+            </p>
+            <p>
+              <label for="homework-cuisine">Preferred cuisine</label>
+              <select id="homework-cuisine"><option>Any cuisine</option><option>Mediterranean</option><option>Mexican</option><option>Indian</option></select>
+            </p>
+            <p>
+              <label for="homework-time">Maximum cook time</label>
+              <select id="homework-time"><option>30 minutes</option><option selected>45 minutes</option><option>60 minutes</option></select>
+            </p>
+            <p>
+              <label for="homework-protein">Minimum protein per serving</label>
+              <select id="homework-protein"><option>No minimum</option><option>10 grams</option><option>20 grams</option><option>30 grams</option></select>
+            </p>
+          </fieldset>
+          <button type="submit">Save Profile</button>
+        </form>
+
+        <h3>Cooking Achievements</h3>
+        <p>
+          Every recipe includes an “I cooked this dish” button in the full app.
+          Cooking history is saved to the signed-in profile.
+        </p>
+        <ul>
+          <li><strong>Taste Trailblazer:</strong> earned for each new recipe tried.</li>
+          <li><strong>Encore Expert:</strong> earned for each recipe cooked at least four times.</li>
+        </ul>
+      </section>
+
+      <section id="about">
+        <h2>About CookWise</h2>
+        <p>
+          CookWise is made for beginner cooks who want to prepare more meals at
+          home without feeling overwhelmed. It gathers approachable recipes
+          from many cuisines and presents clear information about ingredients,
+          instructions, difficulty, cooking time, servings, and nutrition.
+        </p>
+        <p>
+          The purpose of CookWise is to move people from browsing to cooking.
+          One daily recommendation offers a simple place to begin, while the
+          full recipe collection changes order regularly so new ideas and
+          familiar favorites both get noticed.
+        </p>
+
+        <h3>Personalized Support</h3>
+        <p>
+          In the full application, signed-in users can save preferences for
+          serving count, cuisine, maximum cooking time, and minimum protein per
+          serving. Closer matches appear near the top while CookWise continues
+          to consider overall recipe quality.
+        </p>
+
+        <h3>Motivation and Progress</h3>
+        <p>
+          Users can record dishes they complete, review their recent cooking
+          history, and stack achievements. Taste Trailblazer celebrates trying
+          a new recipe, and Encore Expert celebrates cooking the same recipe at
+          least four times.
+        </p>
+
+        <h3>Recipe Information</h3>
+        <p>
+          The full CookWise application imports recipes from Spoonacular and
+          links to each credited original publisher. Recipes are checked for
+          usable ingredients, instructions, practical cooking time, provider
+          rating, and reasonable nutrition estimates. Less-than-ideal recipes
+          may include educational guidance instead of being automatically
+          removed.
+        </p>
+        <p>
+          Imported punctuation is checked automatically. Ingredient amounts use
+          U.S. measurements, and metric temperatures or pan dimensions are
+          converted to Fahrenheit and inches. Vague instructions show relevant
+          measured ingredients when they can be matched accurately.
+        </p>
+
+        <h3>Privacy and Responsible Use</h3>
+        <p>
+          The full application stores accounts, preferences, achievements, and
+          cooking history in a local SQLite database. Passwords are protected
+          with salted hashes. Private API keys and database files are excluded
+          from the public GitHub repository.
+        </p>
+        <p>
+          Macro values are approximations. Users managing allergies should
+          always check labels and the original recipe source.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2026 CookWise</p>
+    </footer>
+    <script>
+      const servingSelect = document.querySelector("#servings");
+
+      function displayAmount(value) {
+        const rounded = Math.round(value * 100) / 100;
+        if (rounded === 0.25) return "1/4";
+        if (rounded === 0.5) return "1/2";
+        if (rounded === 0.75) return "3/4";
+        return String(rounded);
+      }
+
+      function updateExampleServings() {
+        const servings = Number(servingSelect.value);
+        const multiplier = servings / 2;
+        document.querySelector("#ingredient-serving-count").textContent = servings;
+        document.querySelectorAll("[data-base-amount]").forEach((amount) => {
+          amount.textContent = displayAmount(
+            Number(amount.dataset.baseAmount) * multiplier
+          );
+        });
+        document.querySelectorAll("[data-base-total]").forEach((total) => {
+          total.textContent = displayAmount(
+            (Number(total.dataset.baseTotal) / 2) * servings
+          );
+        });
+        document.querySelector("#serving-update-status").textContent =
+          "Ingredients and recipe totals are shown for " + servings +
+          (servings === 1 ? " person." : " people.");
+      }
+
+      servingSelect.addEventListener("change", updateExampleServings);
+    </script>
+  </body>
+</html>

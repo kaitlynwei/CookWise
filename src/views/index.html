@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+      name="description"
+      content="CookWise offers recipes for beginners, meal ideas, and practical nutrition information."
+    >
+    <title>CookWise</title>
+    <!-- Served only through CookWise page routes. -->
+    <link rel="stylesheet" href="/css/styles.css">
+  </head>
+  <body class="home-page">
+    <header>
+      <h1>CookWise</h1>
+      <p>Cook at home more often. Start with one recipe.</p>
+      <nav aria-label="Main navigation">
+        <a href="/" aria-current="page">Home</a>
+        <a href="/recipes">Find Recipes</a>
+        <a href="/nutrition">Macro Guide</a>
+        <a href="/about">About</a>
+        <a href="/profile">Profile</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="home-hero" aria-labelledby="daily-motivation">
+        <article id="daily-recommendation" class="featured-recipe is-loading" aria-labelledby="recommended-name">
+          <div id="recommended-image-wrap" class="featured-recipe-media"></div>
+          <div class="featured-recipe-content">
+            <p class="eyebrow">Today's pick</p>
+            <h3 id="recommended-name">Loading today's recipe</h3>
+            <p id="recommended-description">A fresh idea chosen to make starting dinner easier.</p>
+            <ul id="recommended-summary" class="recipe-meta" aria-label="Recipe details"></ul>
+            <p><a id="recommended-link" class="text-action" href="/recipes">Cook this recipe</a></p>
+          </div>
+        </article>
+
+        <div class="home-hero-intro">
+          <p class="eyebrow">A new favorite for your kitchen</p>
+          <h2 id="daily-motivation">You do not have to be an expert to make a meal you are proud of today.</h2>
+          <p>
+            Find practical recipes with clear steps, flexible servings, and
+            helpful nutrition context.
+          </p>
+          <p><a class="primary-action" href="/recipes">Browse all recipes</a></p>
+        </div>
+      </section>
+
+      <section class="recipe-shelf" aria-labelledby="popular-heading">
+        <div class="section-heading-row">
+          <div>
+            <p class="eyebrow">A few more ideas</p>
+            <h2 id="popular-heading">Worth Cooking Next</h2>
+          </div>
+          <a class="text-action" href="/recipes">See every recipe</a>
+        </div>
+        <p>
+          Three approachable dishes from the collection, refreshed each day.
+        </p>
+        <div id="popular-recipes"></div>
+      </section>
+
+      <section class="confidence-strip" aria-labelledby="confidence-heading">
+        <h2 id="confidence-heading">Made for learning as you cook</h2>
+        <ul aria-label="CookWise recipe features">
+          <li><strong>Clear steps</strong><span>Directions that keep the process manageable</span></li>
+          <li><strong>Flexible servings</strong><span>Ingredient amounts for 1 to 8 people</span></li>
+          <li><strong>Useful nutrition</strong><span>Macros with practical eating context</span></li>
+        </ul>
+        <p><strong id="hero-recipe-count">Recipes ready</strong> and waiting for your next kitchen win.</p>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2026 CookWise</p>
+    </footer>
+
+    <script src="/js/home.js"></script>
+  </body>
+</html>

@@ -1,6 +1,5 @@
-const recipePath = window.location.pathname.match(/^\/recipes\/(\d+)\/?$/);
 const params = new URLSearchParams(window.location.search);
-const recipeId = recipePath ? recipePath[1] : params.get("id");
+const recipeId = params.get("id");
 let recipe;
 
 function renderCookCount(stats) {
@@ -38,7 +37,7 @@ async function recordCookedRecipe() {
       status.replaceChildren();
       const text = document.createTextNode("Sign in to record this dish. ");
       const link = document.createElement("a");
-      link.href = "/signin";
+      link.href = "signin.html";
       link.textContent = "Sign in";
       status.append(text, link);
       return;
@@ -117,25 +116,19 @@ function renderIngredients(servings) {
   });
 }
 
-function formatMacroAmount(value, unit) {
-  const amount = Number(value).toLocaleString(undefined, {
-    maximumFractionDigits: 1
-  });
-  return unit ? amount + " " + unit : amount;
-}
-
-function addMacro(tableBody, name, value, unit, servings) {
-  const row = document.createElement("tr");
-  const nutrient = document.createElement("th");
-  const perServing = document.createElement("td");
-  const batchTotal = document.createElement("td");
-
-  nutrient.scope = "row";
-  nutrient.textContent = name;
-  perServing.textContent = formatMacroAmount(value, unit);
-  batchTotal.textContent = formatMacroAmount(value * servings, unit);
-  row.append(nutrient, perServing, batchTotal);
-  tableBody.append(row);
+function addMacro(list, name, value, unit, servings) {
+  const item = document.createElement("li");
+  const unitText = unit ? " " + unit : "";
+  item.textContent =
+    name +
+    ": " +
+    value.toLocaleString() +
+    unitText +
+    " per serving; " +
+    (value * servings).toLocaleString() +
+    unitText +
+    " recipe total";
+  list.append(item);
 }
 
 function renderMacros(servings) {
@@ -143,29 +136,18 @@ function renderMacros(servings) {
   list.replaceChildren();
 
   addMacro(list, "Calories", recipe.macros.calories, "", servings);
-  addMacro(list, "Protein", recipe.macros.protein, "g", servings);
+  addMacro(list, "Protein", recipe.macros.protein, "grams", servings);
   addMacro(
     list,
     "Carbohydrates",
     recipe.macros.carbohydrates,
-    "g",
+    "grams",
     servings
   );
-  addMacro(list, "Fat", recipe.macros.fat, "g", servings);
-  addMacro(list, "Fiber", recipe.macros.fiber, "g", servings);
-  addMacro(list, "Sugar", recipe.macros.sugar, "g", servings);
-  addMacro(list, "Sodium", recipe.macros.sodium, "mg", servings);
-
-  document.querySelector("#macro-total-heading").textContent =
-    "Full batch (" + servings + (servings === 1 ? " serving)" : " servings)");
-  document.querySelector("#macro-serving-summary").textContent =
-    servings === 1
-      ? "This selected batch makes 1 serving, so one serving is the full prepared recipe."
-      : "This selected batch makes " +
-        servings +
-        " servings. One serving is 1 of " +
-        servings +
-        " equal portions of the prepared recipe.";
+  addMacro(list, "Fat", recipe.macros.fat, "grams", servings);
+  addMacro(list, "Fiber", recipe.macros.fiber, "grams", servings);
+  addMacro(list, "Sugar", recipe.macros.sugar, "grams", servings);
+  addMacro(list, "Sodium", recipe.macros.sodium, "milligrams", servings);
 }
 
 function updateServings() {
@@ -183,83 +165,38 @@ function updateServings() {
     ".";
 }
 
-function smartEatingPoints() {
-  const macros = recipe.macros;
-  const points = [];
-  const calories = Math.round(macros.calories);
-  const protein = Math.round(macros.protein * 10) / 10;
-  const fiber = Math.round(macros.fiber * 10) / 10;
-  const sodium = Math.round(macros.sodium);
-  const sugar = Math.round(macros.sugar * 10) / 10;
+function smartEatingText() {
+  const parts = [
+    (recipe.approvalLevel || "Approved") + ".",
+    "This recipe was selected with a " +
+      recipe.healthScore +
+      "/100 provider health score and a " +
+      recipe.providerScore +
+      "/100 provider recipe score."
+  ];
 
+  if (recipe.macros.protein >= 20) {
+    parts.push("It supplies at least 20 grams of protein per serving.");
+  }
+  if (recipe.macros.fiber >= 5) {
+    parts.push("It supplies at least 5 grams of fiber per serving.");
+  }
   if (recipe.dishType === "Sweet") {
-    points.push(
-      "A sweet dish with about " + calories + " calories per serving"
+    parts.push(
+      "For a sweet recipe, consider the serving size and the day's total added sugar."
     );
-  } else if (calories >= 700) {
-    points.push(
-      "A hearty meal with about " + calories + " calories per serving"
-    );
-  } else if (calories <= 400) {
-    points.push(
-      "A lighter meal with about " + calories + " calories per serving"
-    );
-  } else {
-    points.push(
-      "A moderate meal with about " + calories + " calories per serving"
+  }
+  if (recipe.macros.sodium >= 700) {
+    parts.push(
+      "Its estimated sodium is relatively high, so ingredients with less sodium may be useful."
     );
   }
 
-  if (protein >= 25) {
-    points.push(protein + " g protein per serving, making this a protein-forward choice");
-  } else if (recipe.dishType !== "Sweet" && protein < 12) {
-    points.push(
-      protein +
-        " g protein per serving, so beans, eggs, tofu, fish, or poultry could make it more filling"
-    );
-  } else {
-    points.push(protein + " g protein per serving");
+  if ((recipe.nutritionGuidance || []).length) {
+    parts.push(...recipe.nutritionGuidance);
   }
 
-  if (fiber >= 5) {
-    points.push(fiber + " g fiber per serving, which adds useful staying power");
-  } else if (fiber < 3 && recipe.dishType !== "Sweet") {
-    points.push(
-      fiber + " g fiber per serving, so a vegetable, bean, or whole-grain side would add balance"
-    );
-  }
-
-  if (sodium >= 700) {
-    points.push(
-      sodium.toLocaleString() +
-        " mg sodium per serving, so lower-sodium packaged ingredients may be helpful"
-    );
-  }
-
-  if (recipe.dishType === "Sweet" || sugar >= 20) {
-    points.push(
-      sugar + " g sugar per serving, making portion size useful to keep in mind"
-    );
-  }
-
-  if (macros.fat >= 35) {
-    points.push(
-      Math.round(macros.fat * 10) / 10 +
-        " g fat per serving, so a smaller portion may suit a lighter meal"
-    );
-  }
-
-  return points;
-}
-
-function renderSmartEatingContext() {
-  const list = document.querySelector("#smart-context");
-  list.replaceChildren();
-  smartEatingPoints().forEach((point) => {
-    const item = document.createElement("li");
-    item.textContent = point;
-    list.append(item);
-  });
+  return parts.join(" ");
 }
 
 async function loadPersonalComparison() {
@@ -276,7 +213,7 @@ async function loadPersonalComparison() {
       "Complete your profile to compare this recipe with your personal protein reference. "
     );
     const link = document.createElement("a");
-    link.href = "/profile";
+    link.href = "profile.html";
     link.textContent = "Complete profile";
     context.append(text, link);
     return;
@@ -331,7 +268,7 @@ function renderRecipe() {
   const sourceLink = document.querySelector("#source-link");
   sourceLink.href = recipe.sourceUrl;
   sourceLink.textContent = recipe.sourceName;
-  renderSmartEatingContext();
+  document.querySelector("#smart-context").textContent = smartEatingText();
   document.querySelector("#dietary-labels").textContent =
     recipe.dietaryLabels.length
       ? "Dietary labels confirmed by the source: " + recipe.dietaryLabels.join(", ") + "."
@@ -361,9 +298,7 @@ function renderRecipe() {
     if (step.ingredientAmounts && step.ingredientAmounts.length) {
       const measurements = document.createElement("p");
       measurements.textContent =
-        (step.ingredientAmounts.length === 1
-          ? "Ingredient amount: "
-          : "Ingredient amounts: ") +
+        "Measured ingredients for this step (source recipe total): " +
         step.ingredientAmounts.join(", ") +
         ".";
       item.append(measurements);

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sign in to your CookWise account.">
+    <title>Sign In | CookWise</title>
+    <!-- Served only through CookWise page routes. -->
+    <link rel="stylesheet" href="/css/styles.css">
+  </head>
+  <body>
+    <header>
+      <p><a href="/">CookWise</a></p>
+      <nav aria-label="Main navigation">
+        <a href="/">Home</a>
+        <a href="/recipes">Find Recipes</a>
+        <a href="/nutrition">Macro Guide</a>
+        <a href="/about">About</a>
+        <a href="/signin" aria-current="page">Sign In</a>
+      </nav>
+    </header>
+
+    <main>
+      <h1>Sign In</h1>
+      <form id="signin-form" data-mode="signin">
+        <p>
+          <label for="username">Username:</label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            autocomplete="username"
+            required
+          >
+          <button
+            class="password-toggle"
+            type="button"
+            data-password-target="password"
+            aria-pressed="false"
+          >Show password</button>
+        </p>
+        <p>
+          <label for="password">Password:</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            required
+          >
+        </p>
+        <button type="submit">Sign In</button>
+        <p id="auth-message" role="status" aria-live="polite"></p>
+      </form>
+
+      <p>Need an account? <a href="/signup">Sign up</a>.</p>
+    </main>
+
+    <footer>
+      <p>&copy; 2026 CookWise</p>
+    </footer>
+
+    <script src="/js/auth.js"></script>
+  </body>
+</html>

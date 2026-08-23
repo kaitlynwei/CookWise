@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Sign in to your CookWise account.">
     <title>Sign In | CookWise</title>
+    <link rel="stylesheet" href="css/styles.css">
   </head>
   <body>
     <header>
@@ -30,6 +31,12 @@
             autocomplete="username"
             required
           >
+          <button
+            class="password-toggle"
+            type="button"
+            data-password-target="password"
+            aria-pressed="false"
+          >Show password</button>
         </p>
         <p>
           <label for="password">Password:</label>

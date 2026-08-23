@@ -11,8 +11,6 @@ const API_URL = "https://api.spoonacular.com/recipes/complexSearch";
 const DEFAULT_CANDIDATE_COUNT = 50;
 const MIN_CANDIDATE_COUNT = 25;
 const MAX_CANDIDATE_COUNT = 100;
-const SEARCHES_PER_SYNC = 9;
-const MAX_SEARCH_OFFSET = 200;
 
 const searches = [
   {
@@ -31,7 +29,7 @@ const searches = [
     type: "main course"
   },
   {
-    query: "Mediterranean grain bowl",
+    query: "Mediterranean dinner",
     cuisine: "Mediterranean",
     type: "main course"
   },
@@ -45,98 +43,14 @@ const searches = [
     cuisine: "Middle Eastern",
     type: "main course"
   },
-  { query: "rice bowl vegetables", cuisine: "Japanese", type: "main course" },
-  { query: "vegetable rice bowl", cuisine: "Korean", type: "main course" },
-  { query: "noodles vegetables", cuisine: "Thai", type: "main course" },
-  { query: "noodle soup", cuisine: "Vietnamese", type: "main course" },
-  { query: "chicken salad", cuisine: "Greek", type: "main course" },
-  { query: "vegetable dinner", cuisine: "French", type: "main course" },
-  { query: "chicken rice", cuisine: "Caribbean", type: "main course" },
-  { query: "fish dinner", cuisine: "Latin American", type: "main course" },
-  { query: "peanut stew vegetables", cuisine: "African", type: "main course" },
-  { query: "sheet pan chicken vegetables", cuisine: "American", type: "main course" },
   {
     query: "fish vegetables",
     cuisine: "",
     type: "main course"
   },
-  { query: "one pot vegetarian dinner", cuisine: "", type: "main course" },
-  { query: "tofu vegetables", cuisine: "Asian", type: "main course" },
-  { query: "eggs vegetables", cuisine: "", type: "breakfast" },
-  { query: "oatmeal fruit", cuisine: "", type: "breakfast" },
-  { query: "yogurt breakfast", cuisine: "", type: "breakfast" },
   { query: "fruit dessert", cuisine: "", type: "dessert" },
-  { query: "baked fruit dessert", cuisine: "", type: "dessert" },
-  { query: "chocolate dessert", cuisine: "", type: "dessert" },
-  { query: "savory snack", cuisine: "", type: "appetizer" },
-  { query: "vegetable soup", cuisine: "", type: "soup" },
-  { query: "bean salad", cuisine: "", type: "salad" }
+  { query: "oatmeal", cuisine: "", type: "breakfast" }
 ];
-
-function ensureSyncStateTable(database) {
-  database.exec(`
-    CREATE TABLE IF NOT EXISTS recipe_sync_state (
-      state_key TEXT PRIMARY KEY,
-      state_value INTEGER NOT NULL
-    );
-  `);
-}
-
-function syncStateValue(database, key, fallback = 0) {
-  ensureSyncStateTable(database);
-  const row = database
-    .prepare("SELECT state_value FROM recipe_sync_state WHERE state_key = ?")
-    .get(key);
-  return row ? Number(row.state_value) : fallback;
-}
-
-function searchKey(search) {
-  return [search.query, search.cuisine, search.type]
-    .map((value) => String(value || "").trim().toLowerCase())
-    .join("|");
-}
-
-function selectSearchBatch(database, pool = searches, count = SEARCHES_PER_SYNC) {
-  if (pool.length === 0) return [];
-  const cursor = syncStateValue(database, "search_cursor") % pool.length;
-  const batchSize = Math.min(count, pool.length);
-  return Array.from(
-    { length: batchSize },
-    (_, index) => pool[(cursor + index) % pool.length]
-  );
-}
-
-function getSearchOffset(database, search) {
-  return syncStateValue(database, "offset:" + searchKey(search));
-}
-
-function nextSearchOffset(currentOffset, requested, received) {
-  if (received === 0) return 0;
-  const next = currentOffset + Math.max(requested, received);
-  return next >= MAX_SEARCH_OFFSET ? 0 : next;
-}
-
-function saveSyncProgress(database, batch, offsetUpdates) {
-  ensureSyncStateTable(database);
-  const statement = database.prepare(`
-    INSERT INTO recipe_sync_state (state_key, state_value)
-    VALUES (?, ?)
-    ON CONFLICT(state_key) DO UPDATE SET state_value = excluded.state_value
-  `);
-  const currentCursor = syncStateValue(database, "search_cursor");
-
-  database.exec("BEGIN");
-  try {
-    statement.run("search_cursor", currentCursor + batch.length);
-    offsetUpdates.forEach(({ search, offset }) => {
-      statement.run("offset:" + searchKey(search), offset);
-    });
-    database.exec("COMMIT");
-  } catch (error) {
-    database.exec("ROLLBACK");
-    throw error;
-  }
-}
 
 function stripHtml(value) {
   return cleanPunctuation(
@@ -460,7 +374,6 @@ function openDatabase() {
   if (!columns.has("image_url")) {
     database.exec("ALTER TABLE recipes ADD COLUMN image_url TEXT NOT NULL DEFAULT ''");
   }
-  ensureSyncStateTable(database);
   return database;
 }
 
@@ -583,69 +496,57 @@ async function syncRecipes() {
   const candidateTarget = candidateCountFromArguments();
   const selected = new Map();
   let reviewed = 0;
-  const database = openDatabase();
-  try {
-    const searchBatch = selectSearchBatch(database);
-    const offsetUpdates = [];
+  const runOffset = Math.floor(Math.random() * 21);
 
-    for (const [index, search] of searchBatch.entries()) {
-      if (reviewed >= candidateTarget) break;
-      const searchesRemaining = searchBatch.length - index;
-      const candidatesRemaining = candidateTarget - reviewed;
-      const requestedForSearch = Math.ceil(
-        candidatesRemaining / searchesRemaining
-      );
-      const offset = getSearchOffset(database, search);
-      const results = await fetchSearch(
-        search,
-        apiKey,
-        requestedForSearch,
-        offset
-      );
-      reviewed += results.length;
-      offsetUpdates.push({
-        search,
-        offset: nextSearchOffset(offset, requestedForSearch, results.length)
+  for (const [index, search] of searches.entries()) {
+    const searchesRemaining = searches.length - index;
+    const candidatesRemaining = candidateTarget - reviewed;
+    const requestedForSearch = Math.ceil(
+      candidatesRemaining / searchesRemaining
+    );
+    const results = await fetchSearch(
+      search,
+      apiKey,
+      requestedForSearch,
+      runOffset + index
+    );
+    reviewed += results.length;
+    results
+      .map((recipe) => normalizeRecipe(recipe, search))
+      .filter(Boolean)
+      .forEach((recipe) => {
+        const existing = selected.get(recipe.id);
+        if (!existing || recipe.smartScore > existing.smartScore) {
+          selected.set(recipe.id, recipe);
+        }
       });
-      results
-        .map((recipe) => normalizeRecipe(recipe, search))
-        .filter(Boolean)
-        .forEach((recipe) => {
-          const existing = selected.get(recipe.id);
-          if (!existing || recipe.smartScore > existing.smartScore) {
-            selected.set(recipe.id, recipe);
-          }
-        });
-    }
-
-    const recipes = [...selected.values()].sort(
-      (first, second) => second.smartScore - first.smartScore
-    );
-
-    if (recipes.length === 0) {
-      throw new Error(
-        "No recipes passed the CookWise recipe checks. The saved collection was not changed."
-      );
-    }
-
-    const result = saveRecipes(database, recipes);
-    saveSyncProgress(database, searchBatch, offsetUpdates);
-    console.log(
-      "Recipe sync complete: " + reviewed + " candidates reviewed across " +
-        searchBatch.length + " rotating topics, " +
-        recipes.length + " approved, " +
-        result.added +
-        " added, " +
-        result.updated +
-        " updated, " +
-        result.removed +
-        " removed by safety filters, " +
-        result.total +
-        " total."
-    );
-  } finally {
-    database.close();
   }
+
+  const recipes = [...selected.values()].sort(
+    (first, second) => second.smartScore - first.smartScore
+  );
+
+  if (recipes.length === 0) {
+    throw new Error(
+      "No recipes passed the CookWise recipe checks. The saved collection was not changed."
+    );
+  }
+
+  const database = openDatabase();
+  const result = saveRecipes(database, recipes);
+  database.close();
+  console.log(
+    "Recipe sync complete: " + reviewed + " candidates reviewed, " +
+      recipes.length + " approved, " +
+      result.added +
+      " added, " +
+      result.updated +
+      " updated, " +
+      result.removed +
+      " removed by safety filters, " +
+      result.total +
+      " total."
+  );
 }
 
 if (require.main === module) {
@@ -658,16 +559,10 @@ if (require.main === module) {
 module.exports = {
   candidateCountFromArguments,
   difficulty,
-  getSearchOffset,
-  nextSearchOffset,
   normalizeRecipe,
   nutritionGuidance,
   passesApproval,
   saveRecipes,
-  saveSyncProgress,
-  searches,
-  searchKey,
-  selectSearchBatch,
   stripHtml,
   conciseDescription
 };

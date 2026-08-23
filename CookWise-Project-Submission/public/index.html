@@ -5,14 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta
       name="description"
-      content="CookWise offers beginner-friendly recipes, meal ideas, and practical nutrition education."
+      content="CookWise offers recipes for beginners, meal ideas, and practical nutrition information."
     >
     <title>CookWise</title>
+    <link rel="stylesheet" href="css/styles.css">
   </head>
   <body>
     <header>
       <h1>CookWise</h1>
-      <p>Simple recipes. Clear steps. More confidence in the kitchen.</p>
+      <p>Cook at home more often. Start with one recipe.</p>
       <nav aria-label="Main navigation">
         <a href="index.html" aria-current="page">Home</a>
         <a href="recipes.html">Find Recipes</a>
@@ -23,39 +24,36 @@
     </header>
 
     <main>
-      <section>
-        <h2>Welcome to CookWise</h2>
+      <section class="home-hero">
+        <p class="eyebrow">Simple recipes. Clear steps. Real progress.</p>
+        <h2>You can cook something good today</h2>
         <p>
-          Explore clear recipes from several cuisines, adjust every recipe for
-          the number of people you are serving, and learn how each meal fits
-          into a balanced eating pattern. Recipes are selected from an
-          internet recipe provider using popularity, nutrition quality,
-          practical cook time, and ingredient simplicity.
+          Pick a recipe that fits your time and skill level. CookWise keeps
+          every step clear so you can start cooking with confidence.
         </p>
-        <p>
-          <a href="recipes.html">Search all recipes</a>
-        </p>
+        <p><a class="primary-action" href="recipes.html">Find a recipe</a></p>
+        <ul class="hero-highlights" aria-label="CookWise highlights">
+          <li><strong id="hero-recipe-count">Recipes ready</strong><span>from several cuisines</span></li>
+          <li><strong>1 to 8 servings</strong><span>with amounts that adjust</span></li>
+          <li><strong>Personal picks</strong><span>based on your preferences</span></li>
+        </ul>
       </section>
 
-      <section aria-labelledby="recommended-heading">
-        <h2 id="recommended-heading">Recommended Today</h2>
+      <section class="today-pick-section" aria-labelledby="recommended-heading">
+        <h2 id="recommended-heading">Today's Pick</h2>
+        <p>Not sure what to make? Here is one recipe to try today.</p>
         <article id="daily-recommendation">
           <h3 id="recommended-name">Loading recommendation</h3>
-          <p id="recommended-description"></p>
-          <p id="recommended-details"></p>
-          <p id="recommended-reason"></p>
+          <ul id="recommended-summary" class="recipe-preview-summary"></ul>
           <p><a id="recommended-link" href="recipes.html">View recipe</a></p>
         </article>
-        <button id="another-recommendation" type="button">
-          Recommend another meal
-        </button>
       </section>
 
       <section aria-labelledby="popular-heading">
-        <h2 id="popular-heading">Popular Savory and Sweet Picks</h2>
+        <h2 id="popular-heading">More Recipes to Try</h2>
         <p>
-          These beginner-friendly picks are useful starting points for learning
-          different cooking methods.
+          The order changes regularly, so you will see a mix of familiar meals
+          and new ideas. The recipes stay saved in the collection.
         </p>
         <div id="popular-recipes"></div>
       </section>
@@ -68,6 +66,7 @@
           <li>Compare provider ratings, health scores, and nutrition.</li>
           <li>Follow every recipe back to its credited original source.</li>
           <li>Understand what protein, carbohydrates, and fat do.</li>
+          <li>Log dishes you cook and stack fun cooking achievements.</li>
         </ul>
       </section>
     </main>

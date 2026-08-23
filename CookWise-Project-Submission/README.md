@@ -47,12 +47,6 @@ Candidates that pass CookWise's safeguards are added to the catalog. Because
 many candidates may be rejected or already stored, the number added will
 usually be lower than the number reviewed.
 
-CookWise rotates through a broad set of cuisines, meal types, breakfasts,
-snacks, and desserts while keeping the number of Spoonacular searches per sync
-reasonable. It also remembers the next result position for every topic, so a
-later sync continues beyond recipes it already reviewed instead of repeatedly
-starting at the top.
-
 5. Start CookWise:
 
 ```sh
@@ -68,9 +62,9 @@ automatically restarts when project files change.
 
 ```text
 CookWise/
-├── public/              Public stylesheets and browser-side scripts
+├── public/              Browser-facing HTML pages
+│   └── js/              Browser-side functionality
 ├── src/                 Node.js application server
-│   └── views/           HTML pages served through clean routes
 ├── scripts/             Recipe database import tools
 ├── tests/               Automated tests
 ├── data/                Local SQLite database files
@@ -90,9 +84,8 @@ CookWise requires a valid source, usable ingredients and instructions, nutrition
 data, a cook time of 90 minutes or less, and no more than 20 listed ingredients.
 Recipes with less-than-ideal but non-extreme macros are kept with practical
 nutrition guidance instead of being discarded. Every recipe retains a link to
-its credited source. Each sync rotates to a new group of search topics and
-remembers its progress within previously used topics to discover a different
-group of candidates.
+its credited source, and each sync varies its search position to discover a
+different group of candidates.
 
 Each successful sync accumulates new approved recipes and updates recipes that
 were imported previously. Existing recipes are retained unless they no longer

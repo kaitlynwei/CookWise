@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+      name="description"
+      content="CookWise recipe details, ingredients, source attribution, and nutrition."
+    >
+    <title>Recipe | CookWise</title>
+    <link rel="stylesheet" href="css/styles.css">
+  </head>
+  <body>
+    <header>
+      <p><a href="index.html">CookWise</a></p>
+      <nav aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="recipes.html">Find Recipes</a>
+        <a href="nutrition.html">Macro Guide</a>
+        <a href="about.html">About</a>
+        <a href="profile.html">Profile</a>
+      </nav>
+    </header>
+
+    <main>
+      <p><a href="recipes.html">Back to recipe search</a></p>
+
+      <article id="recipe">
+        <section class="recipe-hero">
+          <div class="recipe-summary">
+            <p class="eyebrow">CookWise recipe</p>
+            <h1 id="recipe-name">Recipe</h1>
+            <p id="recipe-description"></p>
+            <div class="recipe-facts">
+              <p><strong>Cuisine</strong><span id="recipe-cuisine"></span></p>
+              <p><strong>Meal type</strong><span id="recipe-dish-type"></span></p>
+              <p><strong>Difficulty</strong><span id="recipe-difficulty"></span></p>
+              <p><strong>Cook time</strong><span>About <span id="recipe-time"></span> minutes</span></p>
+            </div>
+            <p>
+              <strong>Recommended batch:</strong>
+              <span id="recommended-servings"></span> servings
+            </p>
+            <p id="convenience-note"></p>
+            <p>
+              <strong>Provider score:</strong>
+              <span id="provider-score"></span>/100 |
+              <strong>Health score:</strong>
+              <span id="health-score"></span>/100
+            </p>
+            <p>
+              Recipe source:
+              <a id="source-link" href="">View original recipe</a>
+            </p>
+          </div>
+          <figure id="recipe-image-container" hidden>
+            <img id="recipe-image" src="" alt="">
+            <figcaption>Completed dish image provided by the recipe source.</figcaption>
+          </figure>
+        </section>
+
+        <label for="serving-select">People to serve:</label>
+        <select id="serving-select">
+          <option value="1">1 person</option>
+          <option value="2">2 people</option>
+          <option value="3">3 people</option>
+          <option value="4">4 people</option>
+          <option value="5">5 people</option>
+          <option value="6">6 people</option>
+          <option value="7">7 people</option>
+          <option value="8">8 people</option>
+        </select>
+        <p id="serving-status" aria-live="polite"></p>
+
+        <h2>Ingredients</h2>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Amount</th>
+              <th scope="col">Ingredient</th>
+            </tr>
+          </thead>
+          <tbody id="ingredient-list"></tbody>
+        </table>
+        <p>Ingredient wording and measurements come from the credited source.</p>
+
+        <h2>Instructions</h2>
+        <ol id="instruction-list"></ol>
+
+        <h2>Approximate Macros</h2>
+        <ul id="macro-list"></ul>
+        <p>
+          Macros per serving stay the same when the batch changes. Recipe totals
+          show the nutrition for the entire selected batch.
+        </p>
+
+        <section aria-labelledby="dietary-heading">
+          <h2 id="dietary-heading">Dietary and Allergen Information</h2>
+          <p id="dietary-labels"></p>
+          <p id="allergen-information"></p>
+          <p>
+            This is automated ingredient screening, not an allergy guarantee.
+            Check every packaged ingredient label and the original recipe
+            source for cross contact and hidden ingredients.
+          </p>
+        </section>
+
+        <section aria-labelledby="personal-recipe-heading">
+          <h2 id="personal-recipe-heading">Your Personal Comparison</h2>
+          <p id="personal-recipe-context">
+            <a href="signin.html">Sign in</a>
+            and complete your profile to compare this meal with your personal
+            protein reference.
+          </p>
+        </section>
+
+        <h2>Smart Eating Context</h2>
+        <p id="smart-context"></p>
+        <p>
+          Nutrition values are approximations.
+        </p>
+
+        <section aria-labelledby="cooking-progress-heading">
+          <h2 id="cooking-progress-heading">I Made This</h2>
+          <p>
+            Finished cooking? Log this dish and build your CookWise achievement
+            collection.
+          </p>
+          <button id="cooked-button" type="button">I cooked this dish</button>
+          <p id="cooked-status" role="status" aria-live="polite"></p>
+          <p id="recipe-cook-count"></p>
+          <p>
+            <strong>Taste Trailblazer:</strong> earned for each new recipe you
+            try. <strong>Encore Expert:</strong> earned when you cook the same
+            recipe at least four times.
+          </p>
+        </section>
+      </article>
+
+      <section id="missing-recipe" hidden>
+        <h1>Recipe Not Found</h1>
+        <p>The requested recipe is not available.</p>
+        <p><a href="recipes.html">Browse all recipes</a></p>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2026 CookWise</p>
+    </footer>
+
+    <script src="js/recipe.js"></script>
+  </body>
+</html>

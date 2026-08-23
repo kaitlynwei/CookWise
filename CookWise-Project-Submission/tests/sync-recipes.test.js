@@ -4,14 +4,9 @@ const { DatabaseSync } = require("node:sqlite");
 const {
   candidateCountFromArguments,
   difficulty,
-  getSearchOffset,
-  nextSearchOffset,
   normalizeRecipe,
   nutritionGuidance,
   saveRecipes,
-  saveSyncProgress,
-  searches,
-  selectSearchBatch,
   stripHtml
 } = require("../scripts/sync-recipes");
 
@@ -27,28 +22,6 @@ test("uses a 50-candidate default and accepts batches from 25 to 100", () => {
     () => candidateCountFromArguments(["--candidates=50.5"]),
     /whole number/
   );
-});
-
-test("rotates through a broad recipe search collection and remembers offsets", () => {
-  const database = new DatabaseSync(":memory:");
-  assert.ok(searches.length >= 25);
-  assert.ok(new Set(searches.map((search) => search.cuisine)).size >= 12);
-
-  const firstBatch = selectSearchBatch(database, searches, 3);
-  saveSyncProgress(database, firstBatch, [
-    { search: firstBatch[0], offset: 12 }
-  ]);
-  const secondBatch = selectSearchBatch(database, searches, 3);
-
-  assert.deepEqual(secondBatch, searches.slice(3, 6));
-  assert.equal(getSearchOffset(database, firstBatch[0]), 12);
-  database.close();
-});
-
-test("advances search offsets and resets exhausted or very deep searches", () => {
-  assert.equal(nextSearchOffset(20, 10, 10), 30);
-  assert.equal(nextSearchOffset(20, 10, 0), 0);
-  assert.equal(nextSearchOffset(195, 10, 5), 0);
 });
 
 function sampleRecipe(overrides = {}) {

@@ -4,94 +4,75 @@ function titleCase(value) {
   return value.replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-function compactRecipeFacts(recipe) {
-  const category = recipe.cuisine === "International"
-    ? titleCase(recipe.dishType)
-    : recipe.cuisine;
-
-  return [
-    category,
-    titleCase(recipe.difficulty),
-    "About " + recipe.cookTime + " minutes"
-  ].filter(Boolean);
+function sourceLabel(value) {
+  return titleCase(value.replace(/^www\./i, "").replace(/\.(com|org|net)$/i, ""));
 }
 
-function shortDescription(recipe) {
-  const pantryBasics = /^(water|salt|pepper|black pepper|cooking spray|olive oil|vegetable oil|canola oil)$/i;
-  const ingredients = (recipe.ingredients || [])
-    .map((ingredient) => String(ingredient.name || "").trim().toLowerCase())
-    .filter((name) => name && !pantryBasics.test(name))
-    .filter((name, index, names) => names.indexOf(name) === index)
-    .slice(0, 3);
+function recipeFacts(recipe) {
+  const category = [
+    recipe.cuisine === "International" ? "" : recipe.cuisine,
+    recipe.dishType
+  ].filter(Boolean).join(" · ");
+  const dietary = (recipe.dietaryLabels || []).map(titleCase).join(" · ");
+  const nutrition =
+    Math.round(recipe.macros.calories) +
+    " calories · " +
+    Math.round(recipe.macros.protein) +
+    "g protein · " +
+    Math.round(recipe.macros.fat) +
+    "g fat per serving";
 
-  if (ingredients.length) {
-    const lastIngredient = ingredients.pop();
-    const ingredientList = ingredients.length
-      ? ingredients.join(", ") + ", and " + lastIngredient
-      : lastIngredient;
-    return "Featuring " + ingredientList + ".";
-  }
-
-  return "A " + recipe.dishType.toLowerCase() +
-    " with clear steps from start to finish.";
+  return [category, dietary, nutrition, "From " + sourceLabel(recipe.sourceName)]
+    .filter(Boolean);
 }
 
 function renderDescription(list, facts) {
   list.replaceChildren();
   facts.forEach((fact) => {
-    const item = document.createElement("li");
-    item.textContent = fact.replace(/[.!?]+$/, "");
-    list.append(item);
+      const item = document.createElement("li");
+      item.textContent = fact.replace(/[.!?]+$/, "");
+      list.append(item);
   });
 }
 
 function renderRecommendation(recipe) {
   if (!recipe) return;
 
-  const container = document.querySelector("#daily-recommendation");
   document.querySelector("#recommended-name").textContent = recipe.name;
-  document.querySelector("#recommended-description").textContent =
-    shortDescription(recipe);
   renderDescription(
     document.querySelector("#recommended-summary"),
-    compactRecipeFacts(recipe).slice(1)
+    recipeFacts(recipe)
   );
   document.querySelector("#recommended-link").href =
-    "/recipes/" + recipe.id;
-  const imageWrap = document.querySelector("#recommended-image-wrap");
-  imageWrap.replaceChildren();
+    "recipe.html?id=" + recipe.id;
+  const container = document.querySelector("#daily-recommendation");
+  const oldImage = container.querySelector("img");
+  if (oldImage) oldImage.remove();
   if (recipe.imageUrl) {
-    imageWrap.hidden = false;
     const image = document.createElement("img");
     image.src = recipe.imageUrl;
     image.alt = "Completed " + recipe.name;
     image.referrerPolicy = "no-referrer";
-    imageWrap.append(image);
-  } else {
-    imageWrap.hidden = true;
+    container.prepend(image);
   }
-
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => container.classList.remove("is-loading"));
-  });
 }
 
-function renderPopularRecipes(dailyRecipeId) {
+function renderPopularRecipes() {
   const container = document.querySelector("#popular-recipes");
   container.replaceChildren();
 
-  recipes
-    .filter((recipe) => recipe.id !== dailyRecipeId)
-    .slice(0, 3)
-    .forEach((recipe, index) => {
+  const savory = recipes
+    .filter((recipe) => recipe.dishType !== "Sweet")
+    .slice(0, 4);
+  const sweet = recipes
+    .filter((recipe) => recipe.dishType === "Sweet")
+    .slice(0, 2);
+
+  [...savory, ...sweet].forEach((recipe) => {
     const article = document.createElement("article");
     const heading = document.createElement("h3");
     const link = document.createElement("a");
-    const description = document.createElement("p");
     const summary = document.createElement("ul");
-
-    article.className = "recipe-card recipe-card-enter";
-    article.style.setProperty("--card-index", index);
 
     if (recipe.imageUrl) {
       const image = document.createElement("img");
@@ -102,15 +83,12 @@ function renderPopularRecipes(dailyRecipeId) {
       article.append(image);
     }
 
-    link.href = "/recipes/" + recipe.id;
+    link.href = "recipe.html?id=" + recipe.id;
     link.textContent = recipe.name;
     heading.append(link);
-    description.className = "recipe-card-description";
-    description.textContent = shortDescription(recipe);
-    summary.className = "recipe-meta";
-    summary.setAttribute("aria-label", "Recipe details");
-    renderDescription(summary, compactRecipeFacts(recipe));
-    article.append(heading, description, summary);
+    summary.className = "recipe-preview-summary";
+    renderDescription(summary, recipeFacts(recipe));
+    article.append(heading, summary);
     container.append(article);
   });
 }
@@ -131,7 +109,6 @@ async function loadHomeRecipes() {
       ["No internet recipes have been imported yet", "Add a Spoonacular API key and run npm run recipes:sync"]
     );
     document.querySelector("#recommended-link").hidden = true;
-    document.querySelector("#daily-recommendation").classList.remove("is-loading");
     document.querySelector("#popular-recipes").textContent =
       "Popular recipes will appear after the recipe database is synced.";
     return;
@@ -140,9 +117,8 @@ async function loadHomeRecipes() {
   recipes = result.recipes;
   document.querySelector("#hero-recipe-count").textContent =
     result.facets.count + " recipes";
-  document.querySelector("#daily-motivation").textContent = daily.motivation;
   renderRecommendation(daily.recipe);
-  renderPopularRecipes(daily.recipe.id);
+  renderPopularRecipes();
 }
 
 loadHomeRecipes().catch(() => {
@@ -152,5 +128,4 @@ loadHomeRecipes().catch(() => {
     document.querySelector("#recommended-summary"),
     ["CookWise could not load recipes", "Confirm the server is running and try again"]
   );
-  document.querySelector("#daily-recommendation").classList.remove("is-loading");
 });
