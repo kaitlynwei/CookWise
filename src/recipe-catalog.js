@@ -10,7 +10,7 @@ const ROOT = path.resolve(__dirname, "..");
 const DATA_DIRECTORY = path.join(ROOT, "data");
 const DATABASE_PATH = process.env.COOKWISE_DATABASE_PATH ||
   path.join(DATA_DIRECTORY, "cookwise.db");
-const SEED_PATH = path.join(DATA_DIRECTORY, "recipe-catalog-seed.json");
+const SEED_PATH = path.join(ROOT, "seed", "recipe-catalog-seed.json");
 const DEFAULT_CANDIDATE_COUNT = 50;
 const MIN_CANDIDATE_COUNT = 25;
 const MAX_CANDIDATE_COUNT = 100;
