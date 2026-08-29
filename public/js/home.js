@@ -41,6 +41,9 @@ function renderDescription(list, facts) {
   facts.forEach((fact) => {
     const item = document.createElement("li");
     item.textContent = fact.replace(/[.!?]+$/, "");
+    if (fact.startsWith("About ")) {
+      item.classList.add("recipe-time");
+    }
     list.append(item);
   });
 }

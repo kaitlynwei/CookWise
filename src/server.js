@@ -41,8 +41,8 @@ const {
   rotateRecipes
 } = require("./recommendations");
 
-const HOST = "127.0.0.1";
-const PORT = Number(process.env.PORT || 3000);
+const HOST = "0.0.0.0";
+const PORT = Number(process.env.PORT || 8080);
 const ROOT = path.resolve(__dirname, "..");
 const PUBLIC_DIRECTORY = path.join(ROOT, "public");
 const VIEWS_DIRECTORY = path.join(__dirname, "views");

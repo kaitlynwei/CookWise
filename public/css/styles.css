@@ -295,6 +295,14 @@ main > section:first-child {
   font-size: 0.92rem;
 }
 
+.recipe-facts .recipe-time-value {
+  white-space: nowrap;
+}
+
+.recipe-facts .recipe-time-value #recipe-time {
+  display: inline;
+}
+
 #daily-recommendation,
 #popular-recipes article,
 #recipe-results article,
@@ -1119,6 +1127,11 @@ header nav a[aria-current="page"] {
 
 .recipe-meta li {
   max-width: none;
+}
+
+.recipe-meta .recipe-time {
+  overflow-wrap: normal;
+  white-space: nowrap;
 }
 
 .recipe-meta li + li::before {
