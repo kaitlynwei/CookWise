@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta
       name="description"
-      content="Search CookWise recipes by name, cuisine, difficulty, and cook time."
+      content="Search the CookWise recipe catalog by title."
     >
     <title>Find Recipes | CookWise</title>
     <!-- Served only through CookWise page routes. -->
@@ -26,69 +26,26 @@
     <main>
       <h1>Find Recipes</h1>
       <p>
-        Choose one approachable dish and get cooking. Search the collection or
-        narrow it by cuisine, difficulty, and cook time.
+        Choose one approachable dish and get cooking. Search the catalog by
+        recipe title, then open a recipe for its current details.
       </p>
 
       <form id="recipe-filters">
         <p>
-          <label for="recipe-search">Search by recipe or ingredient:</label>
+          <label for="recipe-search">Search by recipe title:</label>
           <input
             id="recipe-search"
             name="search"
             type="search"
-            placeholder="Example: pasta or chickpeas"
+            placeholder="Example: pasta"
           >
-        </p>
-
-        <p>
-          <label for="cuisine-filter">Cuisine:</label>
-          <select id="cuisine-filter" name="cuisine">
-            <option value="">All cuisines</option>
-          </select>
-        </p>
-
-        <p>
-          <label for="difficulty-filter">Difficulty:</label>
-          <select id="difficulty-filter" name="difficulty">
-            <option value="">All difficulty levels</option>
-            <option value="Easy">Easy</option>
-            <option value="Medium">Medium</option>
-            <option value="Hard">Hard</option>
-          </select>
-        </p>
-
-        <p>
-          <label for="dish-filter">Meal type:</label>
-          <select id="dish-filter" name="dishType">
-            <option value="">Sweet and savory</option>
-            <option value="Savory">Savory</option>
-            <option value="Sweet">Sweet</option>
-            <option value="Breakfast">Breakfast</option>
-          </select>
-        </p>
-
-        <p>
-          <label for="time-filter">Maximum cook time:</label>
-          <select id="time-filter" name="time">
-            <option value="">Any cook time</option>
-            <option value="20">20 minutes or less</option>
-            <option value="30">30 minutes or less</option>
-            <option value="45">45 minutes or less</option>
-            <option value="60">60 minutes or less</option>
-          </select>
         </p>
 
         <p>
           <label for="sort-recipes">Sort:</label>
           <select id="sort-recipes" name="sort">
             <option value="rotate">Fresh daily rotation</option>
-            <option value="personalized">Best match for my preferences</option>
-            <option value="smart">CookWise smart ranking</option>
-            <option value="popularity">Provider rating and popularity</option>
-            <option value="health">Health score</option>
             <option value="name">Recipe name</option>
-            <option value="time">Fastest first</option>
           </select>
         </p>
 

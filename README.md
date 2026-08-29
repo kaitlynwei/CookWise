@@ -1,5 +1,5 @@
 # CookWise
-CookWise is a beginner-friendly cooking website with clear recipes from many cuisines, ranging from simple meals to detailed dishes. Each recipe includes macros, difficulty, adjustable servings, provider ratings, nutrition context, and a link to its credited source.
+CookWise is a beginner-friendly cooking website with clear recipes from many cuisines, ranging from simple meals to detailed dishes. When a recipe is opened, CookWise retrieves its current macros, difficulty, adjustable servings, provider ratings, nutrition context, and credited original source from Spoonacular.
 
 The home page provides one daily cooking recommendation, while recipe search
 uses a weekly rotation to keep the collection feeling fresh without deleting
@@ -43,9 +43,8 @@ Each sync reviews up to 50 candidates by default. To choose any batch size from
 npm run recipes:sync -- --candidates=100
 ```
 
-Candidates that pass CookWise's safeguards are added to the catalog. Because
-many candidates may be rejected or already stored, the number added will
-usually be lower than the number reviewed.
+Catalog results are added using only the Spoonacular recipe ID, title, and image
+URL. Full recipe information is never stored or cached.
 
 CookWise rotates through a broad set of cuisines, meal types, breakfasts,
 snacks, and desserts while keeping the number of Spoonacular searches per sync
@@ -59,7 +58,7 @@ starting at the top.
 npm start
 ```
 
-Then open `http://127.0.0.1:3000`.
+Then open `http://127.0.0.1:8080`.
 
 For development, you can use `npm run dev` instead. The development server
 automatically restarts when project files change.
@@ -85,16 +84,19 @@ from Git.
 Account passwords are stored as salted hashes. Profile and session data are
 stored locally in `data/cookwise.db`, which is excluded from Git.
 
-Recipe records are imported from Spoonacular into the same SQLite database.
-CookWise requires a valid source, usable ingredients and instructions, nutrition
-data, a cook time of 90 minutes or less, and no more than 20 listed ingredients.
-Recipes with less-than-ideal but non-extreme macros are kept with practical
-nutrition guidance instead of being discarded. Every recipe retains a link to
-its credited source. Each sync rotates to a new group of search topics and
-remembers its progress within previously used topics to discover a different
-group of candidates.
+The permanent recipe catalog stores only the Spoonacular recipe ID, title, and
+image URL. Ingredients, instructions, nutrition, servings, cuisine, scores,
+source information, and other Spoonacular fields are requested only when a user
+opens a recipe. They are returned to that user and discarded immediately without
+being written to SQLite or held in a server cache. The recipe page displays the
+original source name and hyperlink returned by Spoonacular.
 
-Each successful sync accumulates new approved recipes and updates recipes that
-were imported previously. Existing recipes are retained unless they no longer
-pass the current source, rating, instruction, cook-time, ingredient-count, or
-nutrition safeguards.
+The web service checks periodically whether the last successful catalog refresh
+was at least 24 hours ago. That timestamp and a short-lived refresh lease are
+stored in SQLite, so Railway redeployments do not cause duplicate API calls and
+overlapping refreshes are prevented. A failed refresh does not replace the last
+successful timestamp.
+
+On Railway, mount the persistent volume at `/app/data`; CookWise will use
+`/app/data/cookwise.db`. Keep `SPOONACULAR_API_KEY` in Railway's server-side
+environment variables. Never expose it in browser-side code.

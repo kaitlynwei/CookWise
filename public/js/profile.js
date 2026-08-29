@@ -1,6 +1,11 @@
 const form = document.querySelector("#profile-form");
 const message = document.querySelector("#profile-message");
 const personalContext = document.querySelector("#personal-context");
+const cuisineOptions = [
+  "African", "American", "Asian", "Caribbean", "French", "Greek",
+  "Indian", "Italian", "Japanese", "Korean", "Latin American",
+  "Mediterranean", "Mexican", "Middle Eastern", "Thai", "Vietnamese"
+];
 
 function renderContext(user) {
   personalContext.replaceChildren();
@@ -61,12 +66,9 @@ function fillProfile(user) {
   renderContext(user);
 }
 
-async function loadCuisineOptions() {
-  const response = await fetch("/api/recipes?limit=1");
-  if (!response.ok) return;
-  const result = await response.json();
+function loadCuisineOptions() {
   const select = document.querySelector("#preferred-cuisine");
-  result.facets.cuisines.forEach((cuisine) => {
+  cuisineOptions.forEach((cuisine) => {
     const option = document.createElement("option");
     option.value = cuisine;
     option.textContent = cuisine;
@@ -113,7 +115,7 @@ async function loadCookingStats() {
 }
 
 async function loadProfile() {
-  await loadCuisineOptions();
+  loadCuisineOptions();
   const response = await fetch("/api/me");
 
   if (response.status === 401) {

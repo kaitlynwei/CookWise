@@ -1,9 +1,5 @@
 const filters = document.querySelector("#recipe-filters");
 const searchInput = document.querySelector("#recipe-search");
-const cuisineFilter = document.querySelector("#cuisine-filter");
-const difficultyFilter = document.querySelector("#difficulty-filter");
-const dishFilter = document.querySelector("#dish-filter");
-const timeFilter = document.querySelector("#time-filter");
 const sortRecipes = document.querySelector("#sort-recipes");
 const results = document.querySelector("#recipe-results");
 const resultCount = document.querySelector("#result-count");
@@ -13,30 +9,8 @@ let searchTimer;
 let displayedCount = 0;
 let requestVersion = 0;
 
-function titleCase(value) {
-  return value.replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
-function sourceLabel(value) {
-  return titleCase(value.replace(/^www\./i, "").replace(/\.(com|org|net)$/i, ""));
-}
-
-function recipeFacts(recipe) {
-  const category = [
-    recipe.cuisine === "International" ? "" : recipe.cuisine,
-    recipe.dishType
-  ].filter(Boolean).join(" · ");
-  const dietary = (recipe.dietaryLabels || []).map(titleCase).join(" · ");
-  const nutrition =
-    Math.round(recipe.macros.calories) +
-    " calories · " +
-    Math.round(recipe.macros.protein) +
-    "g protein · " +
-    Math.round(recipe.macros.fat) +
-    "g fat per serving";
-
-  return [category, dietary, nutrition, "From " + sourceLabel(recipe.sourceName)]
-    .filter(Boolean);
+function recipeFacts() {
+  return ["Open for ingredients, instructions, nutrition, and original source"];
 }
 
 function renderDescription(list, facts) {
@@ -79,18 +53,6 @@ function queryString(offset = 0) {
   if (searchInput.value.trim()) {
     parameters.set("query", searchInput.value.trim());
   }
-  if (cuisineFilter.value) {
-    parameters.set("cuisine", cuisineFilter.value);
-  }
-  if (difficultyFilter.value) {
-    parameters.set("difficulty", difficultyFilter.value);
-  }
-  if (dishFilter.value) {
-    parameters.set("dishType", dishFilter.value);
-  }
-  if (timeFilter.value) {
-    parameters.set("maxTime", timeFilter.value);
-  }
   parameters.set("sort", sortRecipes.value);
   parameters.set("limit", String(pageSize));
   parameters.set("offset", String(offset));
@@ -119,15 +81,6 @@ async function renderResults({ append = false } = {}) {
     if (!response.ok) throw new Error("Recipe request failed");
 
     const recipes = result.recipes || [];
-
-    if (cuisineFilter.options.length === 1) {
-      result.facets.cuisines.forEach((cuisine) => {
-        const option = document.createElement("option");
-        option.value = cuisine;
-        option.textContent = cuisine;
-        cuisineFilter.append(option);
-      });
-    }
 
     if (!append && recipes.length === 0) {
       const message = document.createElement("p");

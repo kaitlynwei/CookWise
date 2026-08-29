@@ -9,25 +9,12 @@ const {
 } = require("node:crypto");
 const { DatabaseSync } = require("node:sqlite");
 const { achievementSummary } = require("./achievements");
-const { cleanIngredientName, cleanPunctuation } = require("./text");
-const {
-  convertIngredientToUs,
-  convertTextToUs,
-  ingredientAmountsForStep
-} = require("./recipe-format");
 const {
   ALLERGENS,
-  allergenLabels,
-  detectAllergens,
-  filterForUser,
   parseAvoidedAllergens
 } = require("./dietary");
 const { proteinTargetRange } = require("./nutrition-guidance");
-const {
-  hasPreferences,
-  personalizeRecipes,
-  preferenceScore
-} = require("./preferences");
+const { hasPreferences } = require("./preferences");
 const {
   centimetersToFeetAndInches,
   feetAndInchesToCentimeters,
@@ -37,21 +24,29 @@ const {
 const {
   dailyMotivation,
   dailyRecipeIndex,
-  recommendationReason,
   rotateRecipes
 } = require("./recommendations");
+const {
+  DATABASE_PATH,
+  ensureMinimalRecipeTable,
+  ensureSyncStateTable,
+  seedCatalog
+} = require("./recipe-catalog");
+const { startCatalogScheduler } = require("./recipe-scheduler");
+const {
+  fetchRecipeInformation,
+  normalizeRecipeDetails
+} = require("./spoonacular");
 
 const HOST = "0.0.0.0";
 const PORT = Number(process.env.PORT || 8080);
 const ROOT = path.resolve(__dirname, "..");
 const PUBLIC_DIRECTORY = path.join(ROOT, "public");
 const VIEWS_DIRECTORY = path.join(__dirname, "views");
-const DATA_DIRECTORY = path.join(ROOT, "data");
-const DATABASE_PATH = path.join(DATA_DIRECTORY, "cookwise.db");
 const SESSION_LENGTH_SECONDS = 60 * 60 * 24 * 7;
 const MAX_BODY_BYTES = 20_000;
 
-fs.mkdirSync(DATA_DIRECTORY, { recursive: true });
+fs.mkdirSync(path.dirname(DATABASE_PATH), { recursive: true });
 
 const database = new DatabaseSync(DATABASE_PATH);
 database.exec(`
@@ -83,29 +78,8 @@ database.exec(`
   CREATE TABLE IF NOT EXISTS recipes (
     id INTEGER PRIMARY KEY,
     title TEXT NOT NULL,
-    description TEXT NOT NULL,
-    cuisine TEXT NOT NULL,
-    dish_type TEXT NOT NULL,
-    difficulty TEXT NOT NULL,
-    ready_minutes INTEGER NOT NULL,
-    servings INTEGER NOT NULL,
-    health_score REAL NOT NULL,
-    provider_score REAL NOT NULL,
-    popularity_score INTEGER NOT NULL,
-    smart_score REAL NOT NULL,
-    source_name TEXT NOT NULL,
-    source_url TEXT NOT NULL,
-    ingredients_json TEXT NOT NULL,
-    steps_json TEXT NOT NULL,
-    nutrition_json TEXT NOT NULL,
-    image_url TEXT NOT NULL DEFAULT '',
-    synced_at TEXT NOT NULL
+    image_url TEXT NOT NULL DEFAULT ''
   );
-
-  CREATE INDEX IF NOT EXISTS recipes_smart_score
-    ON recipes(smart_score DESC);
-  CREATE INDEX IF NOT EXISTS recipes_cuisine
-    ON recipes(cuisine);
 
   CREATE TABLE IF NOT EXISTS cooking_history (
     id INTEGER PRIMARY KEY,
@@ -120,6 +94,23 @@ database.exec(`
   CREATE INDEX IF NOT EXISTS cooking_history_user_recipe
     ON cooking_history(user_id, recipe_id);
 `);
+
+const recipeMigration = ensureMinimalRecipeTable(database);
+const seedResult = seedCatalog(database);
+ensureSyncStateTable(database);
+if (recipeMigration.migrated) {
+  console.log(
+    "Recipe catalog storage updated: preserved " +
+      recipeMigration.preservedRecipes +
+      " recipe IDs, titles, and image URLs; removed stored Spoonacular details."
+  );
+}
+if (seedResult.added) {
+  console.log(
+    "Recipe catalog seed merged: added " + seedResult.added +
+      " recipes without changing existing catalog entries."
+  );
+}
 
 const userColumns = new Set(
   database.prepare("PRAGMA table_info(users)").all().map((column) => column.name)
@@ -136,13 +127,6 @@ const userColumns = new Set(
     database.exec("ALTER TABLE users ADD COLUMN " + name + " " + type);
   }
 });
-
-const recipeColumns = new Set(
-  database.prepare("PRAGMA table_info(recipes)").all().map((column) => column.name)
-);
-if (!recipeColumns.has("image_url")) {
-  database.exec("ALTER TABLE recipes ADD COLUMN image_url TEXT NOT NULL DEFAULT ''");
-}
 
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
@@ -378,85 +362,16 @@ function publicUser(user) {
   };
 }
 
-function publicRecipe(row, includeDetails = false) {
-  const nutrition = JSON.parse(row.nutrition_json);
-  const storedIngredients = JSON.parse(row.ingredients_json);
-  const allergens = detectAllergens(storedIngredients);
-  const dietaryStatus = nutrition.dietary || {};
-  const recipe = {
-    id: row.id,
-    name: cleanPunctuation(row.title),
-    description: cleanPunctuation(row.description),
-    cuisine: cleanPunctuation(row.cuisine),
-    dishType: row.dish_type,
-    difficulty: row.difficulty,
-    cookTime: row.ready_minutes,
-    baseServings: row.servings,
-    recommendedServings: row.servings,
-    healthScore: Math.round(row.health_score),
-    providerScore: Math.round(row.provider_score),
-    popularityScore: row.popularity_score,
-    smartScore: Math.round(row.smart_score),
-    sourceName: cleanPunctuation(row.source_name),
-    sourceUrl: row.source_url,
-    imageUrl: row.image_url || "",
-    allergens,
-    allergenLabels: allergens.map((allergen) => allergenLabels[allergen]),
-    dietaryStatus,
-    dietaryLabels: Object.entries(dietaryStatus)
-      .filter(([, matches]) => matches)
-      .map(([diet]) => diet.replace("-", " ")),
-    macros: {
-      calories: nutrition.calories,
-      protein: nutrition.protein,
-      carbohydrates: nutrition.carbohydrates,
-      fat: nutrition.fat,
-      fiber: nutrition.fiber,
-      sugar: nutrition.sugar,
-      sodium: nutrition.sodium
-    },
-    approvalLevel: nutrition.approvalLevel || "Approved",
-    nutritionGuidance: Array.isArray(nutrition.guidance)
-      ? nutrition.guidance
-      : []
+function publicCatalogRecipe(row) {
+  return {
+    id: Number(row.id),
+    name: row.title,
+    imageUrl: row.image_url || ""
   };
-
-  if (includeDetails) {
-    recipe.ingredients = storedIngredients.map((ingredient) =>
-      convertIngredientToUs({
-        ...ingredient,
-        name: cleanIngredientName(ingredient.name),
-        original: cleanPunctuation(ingredient.original)
-      })
-    );
-    recipe.steps = JSON.parse(row.steps_json).map((step) => {
-      const text = convertTextToUs(
-        typeof step === "string" ? step : step.text || step.step
-      );
-      if (typeof step === "string") {
-        return {
-          text,
-          imageUrl: "",
-          ingredientAmounts: ingredientAmountsForStep(text, recipe.ingredients)
-        };
-      }
-      return {
-        text,
-        imageUrl: step.imageUrl || "",
-        ingredientAmounts: ingredientAmountsForStep(text, recipe.ingredients)
-      };
-    });
-  }
-
-  return recipe;
 }
 
-function listRecipes(url, user = null) {
+function listRecipes(url) {
   const query = (url.searchParams.get("query") || "").trim();
-  const cuisine = (url.searchParams.get("cuisine") || "").trim();
-  const difficulty = (url.searchParams.get("difficulty") || "").trim();
-  const dishType = (url.searchParams.get("dishType") || "").trim();
-  const maxTime = Number(url.searchParams.get("maxTime") || 0);
   const requestedLimit = Number(url.searchParams.get("limit") || 24);
   const limit = Number.isFinite(requestedLimit)
     ? Math.min(Math.max(Math.trunc(requestedLimit), 1), 100)
@@ -470,40 +385,15 @@ function listRecipes(url, user = null) {
   const parameters = [];
 
   if (query) {
-    clauses.push(
-      "(title LIKE ? OR description LIKE ? OR ingredients_json LIKE ?)"
-    );
+    clauses.push("title LIKE ?");
     const pattern = "%" + query + "%";
-    parameters.push(pattern, pattern, pattern);
-  }
-
-  if (cuisine) {
-    clauses.push("cuisine = ?");
-    parameters.push(cuisine);
-  }
-
-  if (difficulty) {
-    clauses.push("difficulty = ?");
-    parameters.push(difficulty);
-  }
-
-  if (dishType) {
-    clauses.push("dish_type = ?");
-    parameters.push(dishType);
-  }
-
-  if (maxTime > 0) {
-    clauses.push("ready_minutes <= ?");
-    parameters.push(maxTime);
+    parameters.push(pattern);
   }
 
   const orderBy = {
     name: "title COLLATE NOCASE ASC",
-    time: "ready_minutes ASC, smart_score DESC",
-    health: "health_score DESC, smart_score DESC",
-    popularity: "provider_score DESC, popularity_score DESC",
-    smart: "smart_score DESC, provider_score DESC"
-  }[sort] || "smart_score DESC, provider_score DESC";
+    rotate: "id ASC"
+  }[sort] || "id ASC";
 
   const where = clauses.length ? " WHERE " + clauses.join(" AND ") : "";
   let rows = database
@@ -518,14 +408,8 @@ function listRecipes(url, user = null) {
   if (sort === "rotate") {
     rows = rotateRecipes(rows);
   }
-  let recipes = rows.map((row) => publicRecipe(row));
-  if (user) recipes = filterForUser(recipes, user);
-  if (sort === "personalized") {
-    recipes = personalizeRecipes(recipes, user);
-    recipes.forEach((recipe) => {
-      recipe.preferenceScore = preferenceScore(recipe, user);
-    });
-  }
+  let recipes = rows.map((row) => publicCatalogRecipe(row));
+  if (sort !== "name") recipes = rotateRecipes(recipes);
 
   const total = recipes.length;
   const page = recipes.slice(offset, offset + limit);
@@ -541,15 +425,9 @@ function listRecipes(url, user = null) {
 
 function dailyRecipe(user = null) {
   const rows = database
-    .prepare(
-      "SELECT * FROM recipes ORDER BY smart_score DESC, provider_score DESC LIMIT 50"
-    )
+    .prepare("SELECT id, title, image_url FROM recipes ORDER BY id LIMIT 100")
     .all();
-  let recipes = rows.map((row) => publicRecipe(row));
-  if (user) recipes = filterForUser(recipes, user);
-  if (hasPreferences(user)) {
-    recipes = personalizeRecipes(recipes, user).slice(0, 10);
-  }
+  const recipes = rows.map((row) => publicCatalogRecipe(row));
   const index = dailyRecipeIndex(recipes.length);
   if (index < 0) return null;
 
@@ -557,10 +435,8 @@ function dailyRecipe(user = null) {
   return {
     recipe,
     motivation: dailyMotivation(),
-    reason:
-      (hasPreferences(user) ? "This meal matches your saved preferences. " : "") +
-      recommendationReason(recipe),
-    personalized: hasPreferences(user),
+    reason: "Open the recipe to see its current ingredients, instructions, and nutrition details.",
+    personalized: false,
     date: new Date().toLocaleDateString("en-CA")
   };
 }
@@ -657,16 +533,10 @@ function recordCookedRecipe(response, user, recipeId) {
 }
 
 function recipeFacets() {
-  const cuisines = database
-    .prepare(
-      "SELECT DISTINCT cuisine FROM recipes WHERE cuisine <> '' ORDER BY cuisine"
-    )
-    .all()
-    .map((row) => row.cuisine);
   const count = database.prepare("SELECT COUNT(*) AS count FROM recipes").get()
     .count;
 
-  return { cuisines, count };
+  return { cuisines: [], count };
 }
 
 function isRateLimited(request) {
@@ -905,9 +775,8 @@ async function updateProfile(request, response, user) {
     });
     return;
   }
-  const availableCuisines = new Set(recipeFacets().cuisines);
-  if (preferredCuisine && !availableCuisines.has(preferredCuisine)) {
-    sendJson(response, 400, { error: "Choose a valid cuisine preference." });
+  if (preferredCuisine.length > 60) {
+    sendJson(response, 400, { error: "Cuisine preferences must be 60 characters or fewer." });
     return;
   }
   if (![20, 30, 45, 60, 90].includes(preferredMaxCookTime)) {
@@ -982,7 +851,7 @@ async function routeApi(request, response, pathname) {
 
     if (request.method === "GET" && pathname === "/api/recipes") {
       const url = new URL(request.url, "http://" + request.headers.host);
-      const result = listRecipes(url, user);
+      const result = listRecipes(url);
       sendJson(response, 200, {
         ...result,
         facets: recipeFacets(),
@@ -1007,7 +876,7 @@ async function routeApi(request, response, pathname) {
     ) {
       const id = Number(pathname.split("/").pop());
       const row = database
-        .prepare("SELECT * FROM recipes WHERE id = ?")
+        .prepare("SELECT id, title, image_url FROM recipes WHERE id = ?")
         .get(id);
 
       if (!row) {
@@ -1015,7 +884,22 @@ async function routeApi(request, response, pathname) {
         return;
       }
 
-      sendJson(response, 200, { recipe: publicRecipe(row, true) });
+      const apiKey = process.env.SPOONACULAR_API_KEY;
+      if (!apiKey) {
+        sendJson(response, 503, {
+          error: "Recipe details are temporarily unavailable."
+        });
+        return;
+      }
+      const spoonacularRecipe = await fetchRecipeInformation(id, apiKey);
+      const recipe = normalizeRecipeDetails(spoonacularRecipe);
+      if (!recipe || recipe.id !== id || !recipe.sourceUrl) {
+        sendJson(response, 502, {
+          error: "Spoonacular did not return a usable credited recipe source."
+        });
+        return;
+      }
+      sendJson(response, 200, { recipe });
       return;
     }
 
@@ -1144,11 +1028,18 @@ const server = http.createServer((request, response) => {
   sendPublicFile(response, filename);
 });
 
+let catalogScheduler;
+
 server.listen(PORT, HOST, () => {
   console.log("CookWise is running at http://" + HOST + ":" + PORT);
+  catalogScheduler = startCatalogScheduler({
+    database,
+    apiKey: process.env.SPOONACULAR_API_KEY
+  });
 });
 
 function close() {
+  catalogScheduler?.stop();
   database.close();
 }
 

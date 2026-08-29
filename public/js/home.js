@@ -1,39 +1,11 @@
 let recipes = [];
 
-function titleCase(value) {
-  return value.replace(/\b\w/g, (letter) => letter.toUpperCase());
+function compactRecipeFacts() {
+  return ["Ingredients, instructions, nutrition, and source available when opened"];
 }
 
-function compactRecipeFacts(recipe) {
-  const category = recipe.cuisine === "International"
-    ? titleCase(recipe.dishType)
-    : recipe.cuisine;
-
-  return [
-    category,
-    titleCase(recipe.difficulty),
-    "About " + recipe.cookTime + " minutes"
-  ].filter(Boolean);
-}
-
-function shortDescription(recipe) {
-  const pantryBasics = /^(water|salt|pepper|black pepper|cooking spray|olive oil|vegetable oil|canola oil)$/i;
-  const ingredients = (recipe.ingredients || [])
-    .map((ingredient) => String(ingredient.name || "").trim().toLowerCase())
-    .filter((name) => name && !pantryBasics.test(name))
-    .filter((name, index, names) => names.indexOf(name) === index)
-    .slice(0, 3);
-
-  if (ingredients.length) {
-    const lastIngredient = ingredients.pop();
-    const ingredientList = ingredients.length
-      ? ingredients.join(", ") + ", and " + lastIngredient
-      : lastIngredient;
-    return "Featuring " + ingredientList + ".";
-  }
-
-  return "A " + recipe.dishType.toLowerCase() +
-    " with clear steps from start to finish.";
+function shortDescription() {
+  return "Open this recipe for its current ingredients, instructions, nutrition details, and credited source.";
 }
 
 function renderDescription(list, facts) {
@@ -57,7 +29,7 @@ function renderRecommendation(recipe) {
     shortDescription(recipe);
   renderDescription(
     document.querySelector("#recommended-summary"),
-    compactRecipeFacts(recipe).slice(1)
+    compactRecipeFacts(recipe)
   );
   document.querySelector("#recommended-link").href =
     "/recipes/" + recipe.id;
